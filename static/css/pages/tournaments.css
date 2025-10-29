@@ -1,0 +1,727 @@
+/* ===== Токены ===== */
+:root{
+  --text:#e5eefc; --muted:#b8c1d9; --brand:#0ea5e9;
+  --glass-1:rgba(18,25,41,.92); --glass-2:rgba(12,18,32,.88);
+  --ring:rgba(148,163,184,.14);
+
+  /* размеры превью турнира (лист) */
+  --tour-thumb-w: 176px;
+  --tour-thumb-h: 112px;
+
+  /* hero */
+  --hero-min-h: 280px;    /* было 220 → выше и «воздушнее» */
+  --hero-pad: 22px;
+  --sticky-top: 64px;
+}
+
+/* ===== Фон страницы «Турниры» ===== */
+
+/* ===== Общие «стеклянные» карточки ===== */
+.card-dark{
+  background: linear-gradient(180deg, var(--glass-1), var(--glass-2));
+  border:1px solid rgba(148,163,184,.14);
+  border-radius:16px; color:var(--text);
+  box-shadow:0 14px 36px rgba(2,6,23,.35);
+}
+.card-ring{ position:relative; }
+.card-ring::before{
+  content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  padding:1px; opacity:.9;
+  background:linear-gradient(135deg, rgba(14,165,233,.35), rgba(59,130,246,.35));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; z-index: 0;
+}
+.ov-hero .dropdown-menu{
+  z-index: 2000;                /* выше, чем любые тени/псевдоэлементы */
+  margin-top: .5rem;            /* если хотите добавить отступ */
+}
+.ov-hero .dropdown{
+  position: relative;
+}
+/* ===== CTA: создать турнир ===== */
+.tour-create{
+  display:flex; gap:16px; align-items:center;
+  padding:16px 18px; /* было 20 — компактнее */
+  margin-bottom:16px; text-decoration:none;
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.tour-create:hover{ transform: translateY(-1px); box-shadow:0 18px 44px rgba(2,6,23,.45); }
+.tour-create__icon{
+  width:64px; height:64px; /* было 72 */
+  flex:0 0 auto; border-radius:50%;
+  display:grid; place-items:center; font-size:34px; font-weight:800;
+  color:#cfe8ff;
+  background: rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.16);
+}
+.tour-create__text .text-muted{ color:var(--muted)!important; }
+
+/* ===== Список турниров ===== */
+.tour-list{ display:flex; flex-direction:column; gap:14px; }
+
+/* Карточка турнира (лист) */
+.tour-card{
+  display:flex;
+  align-items:center;
+  gap:16px;                  /* было 18 */
+  padding:14px 16px;         /* было 16px 18px */
+  border-radius:14px;
+  background: linear-gradient(180deg, rgba(16,23,38,.66), rgba(10,16,28,.66));
+  border:1px solid rgba(148,163,184,.16);
+  box-shadow: 0 10px 26px rgba(2,6,23,.35);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.tour-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 16px 40px rgba(2,6,23,.45);
+  border-color:rgba(148,163,184,.24);
+}
+
+/* Обложка в карточке списка */
+.tour-thumb{
+  flex: 0 0 var(--tour-thumb-w);
+  width: var(--tour-thumb-w);
+  height: var(--tour-thumb-h);
+  border-radius: 12px;
+  overflow: hidden;
+
+  background-size: cover;
+  background-position: center;
+
+  display: block;   /* убирает baseline */
+  line-height: 0;
+}
+.tour-thumb img{
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;   /* убирает нижний зазор у <img> */
+}
+
+/* Контент карточки списка */
+.tour-body{ min-width: 0; flex: 1; }
+.tour-meta{
+  font-size:.86rem;           /* было .9rem */
+  color:var(--muted);
+  margin-bottom:2px;          /* было 4px */
+}
+.tour-title{
+  margin:0;
+  font-size: clamp(1.02rem, 0.95rem + 0.35vw, 1.15rem);
+  font-weight:800; letter-spacing:.2px;
+  line-height: 1.25;
+}
+.tour-sub{
+  margin-top:4px;
+  color:rgba(229,238,252,.82);
+  font-size:.9rem;
+}
+
+/* Чипы статуса в списке */
+.tour-chips{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.chip{
+  display:inline-flex; align-items:center; gap:.35rem;
+  padding:.28rem .5rem;
+  border-radius:999px; font-weight:700; font-size:.72rem;
+  border:1px solid rgba(148,163,184,.18);
+  background: rgba(255,255,255,.06); color:var(--text);
+}
+.chip-blue{    background:rgba(14,165,233,.18); border-color:rgba(14,165,233,.45); }
+.chip-warning{ background:rgba(245,158,11,.18); border-color:rgba(245,158,11,.45); }
+.chip-success{ background:rgba(34,197,94,.18); border-color:rgba(34,197,94,.45); }
+.chip-dark{    background:rgba(30,41,59,.6);    border-color:rgba(148,163,184,.25); }
+.chip-muted{   background:rgba(255,255,255,.06); border-color:rgba(148,163,184,.22); }
+.chip-glass{   background:rgba(255,255,255,.06); border-color:rgba(148,163,184,.22); }
+
+/* Три точки справа в списке */
+.tour-more{
+  margin-left: auto;
+  display:flex; align-items:center; gap:4px;
+  opacity:.8;
+}
+.tour-more .dot{
+  width:3px; height:3px;   /* было 4px */
+  border-radius:999px; background:#c9d4ea; opacity:.75;
+}
+
+/* ===== Адаптив для списка ===== */
+@media (max-width: 992px){
+  :root{ --tour-thumb-w: 152px; --tour-thumb-h: 100px; }
+}
+@media (max-width: 576px){
+  :root{ --tour-thumb-w: 120px; --tour-thumb-h: 84px; }
+  .tour-card{ gap:12px; padding:12px; }
+  .tour-title{ font-size: 1.02rem; }
+  .tour-meta{ font-size: .84rem; }
+  .chip{ font-size: .7rem; padding: .26rem .48rem; }
+}
+
+/* =============================
+   ====== OVERVIEW (hero) ======
+   ============================= */
+
+.ov-hero{
+  position:relative;
+  border-radius:16px;
+  overflow:hidden;
+  margin-bottom:16px;
+}
+.ov-hero-bg{
+  position:absolute; inset:0;
+  background-size:cover;
+  background-position:center 28%;   /* лучшее окно для ваших баннеров */
+  transform: scale(1.03);
+  filter: brightness(.92) saturate(1.02);
+}
+.ov-hero-scrim{
+  position:absolute; inset:0;
+  background:
+    radial-gradient(60% 140% at 50% -30%, rgba(14,165,233,.18), transparent 60%),
+    linear-gradient(180deg, rgba(9,14,28,0) 40%, rgba(9,14,28,.78) 75%, rgba(9,14,28,.92) 100%);
+  pointer-events:none;
+}
+.ov-hero-body{
+  position:relative; z-index:2;
+  display:flex; align-items:flex-end; justify-content:space-between;
+  gap:16px;
+  min-height: var(--hero-min-h);
+  padding: var(--hero-pad);
+}
+.ov-left{ display:flex; flex-direction:column; gap:8px; }
+.ov-logo{
+  width:72px; height:72px; object-fit:cover; border-radius:14px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.15);
+  box-shadow:0 8px 22px rgba(2,6,23,.35);
+}
+.ov-title{
+  margin:0; color:#fff; font-weight:900; letter-spacing:.3px;
+  font-size:1.55rem; /* было 1.8rem */
+  text-shadow:0 2px 10px rgba(0,0,0,.35);
+}
+.ov-sub{ color:rgba(229,238,252,.86); font-weight:600; font-size:.95rem; }
+.ov-sep{ opacity:.6; margin:0 .5rem; }
+.ov-chips{ display:flex; gap:8px; margin-top:6px; }
+
+/* чипы ТОЛЬКО внутри hero — чтобы не конфликтовали со списком */
+.ov-hero .chip{
+  padding:.35rem .6rem; border-radius:999px; font-weight:800; font-size:.78rem;
+  border:1px solid rgba(148,163,184,.22); color:#e5eefc;
+  background:rgba(255,255,255,.06);
+}
+.ov-hero .chip-success{ background: rgba(34,197,94,.18); border-color: rgba(34,197,94,.45); }
+.ov-hero .chip-warning{ background: rgba(245,158,11,.18); border-color: rgba(245,158,11,.45); }
+.ov-hero .chip-muted{   background: rgba(148,163,184,.18); border-color: rgba(148,163,184,.45); }
+.ov-hero .chip-dark{    background: rgba(30,41,59,.66);    border-color: rgba(148,163,184,.28); }
+
+.ov-right{ display:flex; align-items:flex-end; }
+.ov-join{
+  padding:.62rem 1.05rem; border-radius:12px; font-weight:800; line-height:1;
+  box-shadow:0 10px 26px rgba(2,6,23,.45);
+  z-index: 1;
+}
+.btn-brand{
+  color:#fff; background:rgba(14,165,233,.35); border:1px solid rgba(14,165,233,.55);
+}
+.btn-brand:hover{ background:rgba(14,165,233,.5); border-color:rgba(14,165,233,.75); }
+
+@media (min-width: 1400px){
+  :root{ --hero-min-h: 312px; }
+}
+@media (max-width: 768px){
+  .ov-title{ font-size:1.45rem; }
+  .ov-logo{ width:60px; height:60px; }
+  .ov-hero-body{ min-height:200px; padding:16px; }
+}
+
+/* ===== Sticky tabs под hero ===== */
+.ov-tabs{
+  position: sticky;                        /* подгоните под высоту хедера */
+  z-index: 6;
+  margin: 6px 0 14px;
+  padding: 6px 8px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(12,18,32,.74), rgba(12,18,32,.56));
+  border: 1px solid rgba(148,163,184,.14);
+  backdrop-filter: blur(8px);
+  isolation: isolate; 
+}
+.ov-tabs .ov-nav{ gap: 6px; border-bottom: 0 !important; }
+.ov-tabs .ov-nav .nav-link{
+  border: 1px solid rgba(148,163,184,.16) !important;
+  background: rgba(255,255,255,.04) !important;
+  color: #c7d2e9 !important;
+  border-radius: 10px !important;
+  font-weight: 800;
+  padding: .45rem .9rem;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.ov-tabs .ov-nav .nav-link:hover{
+  color:#e5eefc!important; background:rgba(255,255,255,.07)!important;
+  border-color:rgba(148,163,184,.24)!important;
+}
+.ov-tabs .ov-nav .nav-link.active{
+  color:#fff!important; background:rgba(14,165,233,.16)!important;
+  border-color:rgba(14,165,233,.35)!important;
+  box-shadow: inset 0 0 0 1px rgba(14,165,233,.25);
+}
+
+/* Тёмные list-group именно на этой странице */
+body.tournaments-page .list-group{ border-radius: 12px; overflow: hidden; }
+body.tournaments-page .list-group-item{
+  background: rgba(16,23,38,.66);
+  color: var(--text);
+  border-color: rgba(148,163,184,.12);
+}
+body.tournaments-page .list-group-item + .list-group-item{
+  border-top-color: rgba(148,163,184,.10);
+}
+
+/* ====== GRID блоки под табами ====== */
+.ov-grid{
+  display: grid;
+  grid-template-columns: 1.1fr 1fr 1.2fr;  /* Format | Teams | Timeline */
+  gap: 16px;
+  align-items: start;
+  grid-auto-rows: auto;                    /* высота рядов = по содержимому */
+}
+@media (max-width: 1100px){
+  .ov-grid{ grid-template-columns: 1fr; }
+}
+
+/* Базовая карточка */
+.ov-card{
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(16,23,38,.66), rgba(10,16,28,.66));
+  border: 1px solid rgba(148,163,184,.16);
+  box-shadow: 0 10px 26px rgba(2,6,23,.35);
+  padding: 16px 18px;
+  /* ВАЖНО: никаких grid-row! карточки больше НЕ растягиваем вручную */
+}
+
+/* Заголовок карточек */
+.ov-card-h{ font-weight: 900; letter-spacing: .2px; color: #fff; margin-bottom: 10px; }
+
+.ov-grid .ov-timeline{
+  grid-column: 3;     /* правая колонка */
+  grid-row: 1 / span 3;  /* высотой на две строки */
+}
+@media (max-width: 1100px){
+  .ov-grid .ov-timeline{
+    grid-column: auto;
+    grid-row: auto;
+  }
+}
+/* «Описание» — под Format и Teams: на 2 колонки */
+.ov-card--span2{
+  grid-column: 1 / span 2;
+}
+
+/* Вариант «невидимой» карточки: убираем фон/рамку/тень/внутренние отступы */
+.ov-plain{
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+/* Заголовок в таком блоке прячем — описание остаётся «чистым» текстом */
+.ov-plain .ov-card-h{ display:none; }
+/* Текст описания — приятнее читать */
+.ov-plain .ov-desc{
+  margin: 0;
+  color: rgba(229,238,252,.86);
+  line-height: 1.6;
+  font-size: .98rem;
+}
+
+/* Адаптив: в одну колонку */
+@media (max-width: 1100px){
+  .ov-grid{ grid-template-columns: 1fr; }
+  .ov-card--tall{ grid-row: auto; }
+  .ov-card--span2{ grid-column: auto; }
+}
+
+
+.ov-desc-card{
+  grid-column: 1 / span 2; /* занимает две левые колонки под Format+Teams */
+  /* "невидимая" карточка: без фона, рамок и тени */
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0;              /* ровно к краю сетки */
+  color: var(--text);      /* светлый текст */
+}
+.ov-desc-title{
+  margin: 2px 0 10px 0;
+  font-weight: 900;
+  letter-spacing: .2px;
+  color: #fff;
+}
+
+/* тело описания: белый текст, переносы строк как в исходнике */
+.ov-desc-body{
+  color: var(--text);
+  white-space: pre-wrap;      /* сохраняем \n */
+  line-height: 1.5;
+  opacity: .95;
+}
+
+/* ссылки в описании: брендовый цвет + подчёркивание по ховеру */
+.ov-desc-body a{
+  color: var(--brand);
+  text-decoration: none;
+}
+.ov-desc-body a:hover{
+  text-decoration: underline;
+}
+
+/* мобильная колонка — всё в один столбец */
+@media (max-width: 1100px){
+  .ov-grid .ov-timeline{
+    grid-column: auto;
+    grid-row: auto;
+  }
+  .ov-desc-card{
+    grid-column: auto;
+    margin-top: 4px;
+  }
+}
+/* =========================
+   FORMAT / TEAMS helpers
+   ========================= */
+
+.ov-list{ margin:0; padding:0; list-style:none; }
+.ov-list li{
+  display:flex; justify-content:space-between;
+  padding:8px 0; border-bottom:1px dashed rgba(255,255,255,.06);
+}
+.ov-list li:last-child{ border-bottom:none; }
+.ov-k{ color:#b8c1d9; }
+.ov-v{ color:#e5eefc; font-weight:700; }
+
+.ov-kpis{ display:flex; gap:16px; }
+.ov-kpi{
+  flex:1; text-align:center; padding:12px;
+  border-radius:12px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.10);
+}
+.ov-kpi-num{ font-size:1.3rem; font-weight:900; color:#fff; }
+.ov-kpi-sub{ color:#b8c1d9; font-weight:700; }
+.ov-progress{
+  height:7px; border-radius:999px; background:rgba(255,255,255,.10);
+  margin-top:12px; overflow:hidden; box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
+}
+.ov-progress-fill{ height:100%; background:linear-gradient(90deg, rgba(14,165,233,.7), rgba(59,130,246,.7)); }
+.ov-progress-fill{
+  height:100%;
+  background: linear-gradient(90deg, rgba(14,165,233,.7), rgba(59,130,246,.7));
+}
+
+/* =========================
+   TIMELINE
+   ========================= */
+
+/* удобно регулировать размеры одной строкой */
+.ov-timeline{
+  --badge: 60px;  /* квадрат бейджа даты */
+  --gap: 16px;    /* расстояние между бейджем и текстом */
+}
+
+/* Колонка шагов — рисуем одну вертикальную линию между бейджем и текстом */
+.ov-timeline .ov-steps{
+  position: relative;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+}
+.ov-timeline .ov-steps::before{
+  content: "";
+  position: absolute;
+  top: calc(var(--badge) / 2);          /* не налезает на первый бейдж */
+  bottom: calc(var(--badge) / 2);       /* и на последний */
+  left: calc(var(--badge) + var(--gap) / 2); /* Снаружи бейджа, между бейджем и текстом */
+  width: 2px;
+  background: rgba(255,255,255,.08);
+}
+
+.ov-timeline .ov-steps li{
+  display: flex;
+  align-items: flex-start;
+  gap: var(--gap);
+  padding: 14px 0;
+}
+
+.ov-step-date{
+  width: var(--badge);
+  height: var(--badge);
+  border-radius: 12px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  color:#e5eefc; font-weight: 900;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: inset 0 -12px 32px rgba(0,0,0,.12);
+}
+.ov-step-date span{
+  margin-top: 2px;
+  color:#b8c1d9; font-weight:700;
+}
+
+.ov-step-body{ padding-left: calc(var(--gap)/2); } /* микрогап от вертикальной линии */
+.ov-step-title{ color:#fff; font-weight:900; margin-bottom:2px; }
+.ov-step-sub{ color:#b8c1d9; }
+
+@media (max-width: 1100px){
+  /* В одну колонку — линия выравнивается по центру бейджа */
+  .ov-timeline .ov-steps::before{
+    left: calc(var(--badge) / 2);
+  }
+}
+
+.ov-info{
+  grid-column: 1 / span 2;     /* под Format + Teams */
+  /* ov-card уже даёт фон/рамку/тень/паддинги */
+  min-width: 0;                /* чтобы контент не раздувал колонку */
+}
+.ov-info .ov-card-h{
+  margin-bottom: 10px;
+}
+
+.ov-info-body{
+  color: rgba(229,238,252,.92);
+  line-height: 1.55;
+      /* сохраняем \n / <br> */
+  overflow-wrap: anywhere;     /* переноcим длинные URL/слова */
+  word-break: break-word;      /* подстраховка для старых браузеров */
+  max-width: 100%;
+}
+.ov-info-body p{ margin: 0 0 6px; }
+.ov-info-body b{ color:#fff; }
+.ov-info-body a{
+  color:#93c5fd;
+  text-decoration: underline;
+  text-decoration-color: rgba(147,197,253,.45);
+}
+.ov-info-body a:hover{
+  color:#fff;
+  text-decoration-color: rgba(255,255,255,.65);
+}
+
+
+.ov-tabs .ov-tabs-inner{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+}
+.ov-actions .btn.ov-manage{
+  border-radius: 10px;
+  font-weight: 800;
+  padding: .45rem .9rem;
+  border-color: rgba(148,163,184,.20);
+}
+.ov-actions .btn.ov-manage:hover{
+  background: rgba(255,255,255,.08);
+  border-color: rgba(148,163,184,.35);
+}
+.modal.modal-glass { z-index: 1100; }
+
+/* размер и выравнивание */
+.modal-glass .modal-dialog {
+  width: min(900px, 92vw);
+  margin: 1.25rem auto;
+}
+@media (min-width: 768px){
+  .modal-glass .modal-dialog { margin: 2rem auto; }
+}
+
+/* стеклянная «карточка» модалки */
+.modal-glass .modal-content{
+  background: linear-gradient(180deg, rgba(16,23,38,.92), rgba(10,16,28,.92));
+  border: 1px solid rgba(148,163,184,.18);
+  border-radius: 16px;
+  color: var(--text) !important;
+  box-shadow: 0 24px 60px rgba(2,6,23,.50);
+  overflow: hidden;
+}
+
+/* заголовок/подвал */
+.modal-glass .modal-header,
+.modal-glass .modal-footer{
+  border-color: rgba(148,163,184,.12);
+  background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
+}
+.modal-glass .modal-title{ color:#fff; font-weight:900; letter-spacing:.2px; }
+
+/* стандартный текст и muted */
+.modal-glass .modal-body{ color: var(--text) !important; }
+.modal-glass .modal-body .text-muted{ color: var(--muted) !important; }
+
+/* крестик светлый */
+.modal-glass .btn-close{
+  filter: invert(1) grayscale(1) opacity(.85);
+}
+
+/* фон под модалкой — темнее */
+.modal-backdrop.show{
+  opacity: .55;
+}
+
+/* ===== LIST-GROUP с командами ===== */
+.modal-glass .list-group{
+  border-radius: 12px;
+  overflow: hidden;
+  background: transparent;
+}
+.modal-glass .list-group-item{
+  background: rgba(255,255,255,.02) !important;
+  border-color: rgba(148,163,184,.12) !important;
+  color: var(--text) !important;
+}
+.modal-glass .list-group-item + .list-group-item{
+  border-top-color: rgba(148,163,184,.10) !important;
+}
+
+/* кликабельный элемент */
+.modal-glass .list-group-item-action{
+  color: var(--text) !important;
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+.modal-glass .list-group-item-action:hover{
+  background: rgba(255,255,255,.06) !important;
+  border-color: rgba(148,163,184,.20) !important;
+  color:#fff !important;
+}
+.modal-glass .list-group-item-action:active{
+  background: rgba(14,165,233,.14) !important;
+  border-color: rgba(14,165,233,.35) !important;
+}
+
+/* состояние disabled (если нужно) */
+.modal-glass .list-group-item.disabled,
+.modal-glass .list-group-item:disabled{
+  color: rgba(231,238,252,.45) !important;
+  opacity:.65;
+}
+
+/* стрелки/иконки справа */
+.modal-glass .list-group-item i{
+  color: #cfe0ff;
+  opacity:.9;
+}
+
+/* основной текст внутри пункта (если используется .fw-semibold) */
+.modal-glass .list-group-item .fw-semibold{ color:#fff !important; }
+
+/* фокус-контур для клавиатуры */
+.modal-glass .list-group-item-action:focus-visible,
+.modal-glass .btn:focus-visible{
+  outline: 2px solid #0ea5e9;
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+/* кнопки внизу (если есть) */
+.modal-glass .btn-outline-light{
+  color:#e5eefc;
+  border-color: rgba(148,163,184,.35);
+}
+.modal-glass .btn-outline-light:hover{
+  color:#fff;
+  background: rgba(255,255,255,.06);
+  border-color: rgba(148,163,184,.55);
+}
+
+.modal-report .modal-dialog {
+  width: min(640px, 96vw);
+}
+
+/* строка счёта: инпуты в одной линии */
+.modal-report .score-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* сами инпуты счёта */
+.modal-report .score-input {
+  width: 110px;
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: .5px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(148,163,184,.22);
+  color: #e5eefc;
+}
+
+/* двоеточие между ними */
+.modal-report .score-sep {
+  font-weight: 900;
+  font-size: 1.35rem;
+  color: #fff;
+  line-height: 1;
+  margin: 0 .15rem;
+}
+
+/* убираем спиннеры у number */
+.modal-report input[type=number]::-webkit-outer-spin-button,
+.modal-report input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.modal-report input[type=number] { -moz-appearance: textfield; }
+
+/* пресеты-снепчипы */
+.modal-report .quick-sets { display: flex; gap: 8px; flex-wrap: wrap; }
+.modal-report .quick-sets .chip { cursor: pointer; }
+.modal-report .quick-sets .chip:hover {
+  background: rgba(255,255,255,.10);
+  border-color: rgba(148,163,184,.35);
+}
+.join-toast {
+  border: 1px solid rgba(148,163,184,.18);
+  background: linear-gradient(180deg, rgba(16,23,38,.92), rgba(10,16,28,.92));
+  color: var(--text, #e5eefc);
+  border-radius: 14px;
+  overflow: hidden;
+  min-width: 320px;
+  max-width: 420px;
+}
+.join-toast__hdr {
+  background: rgba(255,255,255,.04);
+  color: #e5eefc;
+  border-bottom: 1px solid rgba(148,163,184,.12);
+}
+.join-toast__body {
+  color: #dfe7fb;
+}
+.join-toast .btn-close {
+  filter: invert(1) grayscale(1) opacity(.85);
+}
+.join-toast__dot {
+  width:10px; height:10px; border-radius:999px;
+  background: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34,197,94,.20);
+}
+body.tournaments-page::before{
+  background:
+    linear-gradient(180deg, rgba(6,14,30,0.25) 0%, rgba(6,14,30,0.65) 100%),
+    url("/static/img/bg/mirage_bg.jpg") center top / cover no-repeat;
+  background-attachment: fixed;
+  color: #e5eefc;
+}
+.form-select.select-dark {
+  background: linear-gradient(180deg, rgba(16,23,38,.85), rgba(10,16,28,.85));
+  border: 1px solid rgba(148,163,184,.25);
+  color: #e6eeff;
+}
+.form-select.select-dark:focus {
+  outline: 0;
+  border-color: rgba(99,102,241,.65);
+  box-shadow: 0 0 0 3px rgba(99,102,241,.25);
+}
+
+/* фон выпадающего списка и опций (Chrome/Firefox/Edge) */
+.form-select.select-dark option,
+.form-select.select-dark optgroup {
+  background-color: #0b1324;
+  color: #e6eeff;
+}
+.form-select.select-dark::-ms-expand { display: none; }
+
+/* Firefox — включает тёмную палитру всплывающего меню */
+select.select-dark { color-scheme: dark; }

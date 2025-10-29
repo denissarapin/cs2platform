@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Наши сервера{% endblock %}
+{% block body_class %}servers-page{% endblock %}
+{% block content %}
+
+<h2 class="mb-3">Тренируйся, разогревайся и будь готов к турнирам!</h2>
+
+{# ===== Верхняя лента: мини-карточки режимов (без изображений) ===== #}
+<div class="mode-rail mb-4">
+  {% for mode in modes %}
+    <a class="mode-chip" href="{% url 'servers:mode' mode=mode.code %}">
+      {# удалены chip-bg и chip-scrim #}
+      <span class="chip-title">{{ mode.title }}</span>
+    </a>
+  {% endfor %}
+</div>
+
+{# ===== Сетка: большие вертикальные карточки ===== #}
+<div class="mode-grid">
+  {% for mode in modes %}
+    <a class="mode-tile" href="{% url 'servers:mode' mode=mode.code %}">
+      <div class="mode-bg" style="background-image:url('{% static 'img/servers/modes/' %}{{ mode.code }}.jpg');"></div>
+      <div class="mode-scrim"></div>
+      <div class="mode-caption">
+        <div class="mode-name">{{ mode.title }}</div>
+        <div class="mode-sub">{{ mode.players_total }} игроков</div>
+      </div>
+    </a>
+  {% endfor %}
+</div>
+
+{% endblock %}

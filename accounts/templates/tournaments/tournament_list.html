@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Турниры{% endblock %}
+{% block body_class %}tournaments-page{% endblock %}
+
+{% block content %}
+
+{# картинка по умолчанию для превью турнира #}
+{% static 'img/tournaments/default.jpg' as DEFAULT_COVER %}
+
+{# карточка "Создать турнир" #}
+{% if request.user.is_staff %}
+<a href="{% url 'tournaments:create' %}" class="tour-create card-dark card-ring">
+  <div class="tour-create__icon">+</div>
+  <div class="tour-create__text">
+    <div class="h3 m-0 fw-800">Создать турнир</div>
+    <div class="text-muted mt-1">Создай турнир для своего сообщества.</div>
+  </div>
+</a>
+{% endif %}
+
+<div class="tour-list">
+  {% for t in tournaments %}
+    <a href="{% url 'tournaments:overview' t.pk %}" class="tour-card card-dark">
+      {# обложка: если есть t.cover, берём t.cover.url, иначе DEFAULT_COVER #}
+      <div class="tour-thumb"
+           style="background-image:url('{{ t.cover.url|default:DEFAULT_COVER }}');"></div>
+
+      <div class="tour-body">
+        <div class="tour-meta">
+          {{ t.start_date|date:"d M Y, H:i" }}
+        </div>
+
+        <h3 class="tour-title">{{ t.name }}</h3>
+
+        <div class="tour-sub">
+          Hosted by {{ t.organizer_name|default:"CS2 Platform" }}
+          • {{ t.region|default:"Europe" }}
+          • {{ t.team_size|default:5 }}v{{ t.team_size|default:5 }}
+          • {{ t.max_teams|default:8 }} слотов
+        </div>
+
+        <div class="tour-chips">
+          {% if t.status == "running" %}
+            <span class="chip chip-blue">В процессе</span>
+          {% elif t.status == "upcoming" %}
+            <span class="chip chip-warning">Скоро</span>
+          {% else %}
+            <span class="chip chip-dark">Завершён</span>
+          {% endif %}
+
+          {% if t.invite_only %}
+            <span class="chip chip-muted">Только по инвайту</span>
+          {% endif %}
+
+          {% if t.registration_open %}
+            <span class="chip chip-success">Регистрация открыта</span>
+          {% elif t.status == "upcoming" %}
+            <span class="chip chip-muted">Регистрация закрыта</span>
+          {% endif %}
+
+          <span class="chip chip-glass">
+            {{ t.participants.count|default:0 }} / {{ t.max_teams|default:8 }}
+          </span>
+        </div>
+      </div>
+
+      <div class="tour-more">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </div>
+    </a>
+  {% empty %}
+    <div class="card card-dark card-ring p-3">Турниров пока нет.</div>
+  {% endfor %}
+</div>
+
+{% endblock %}

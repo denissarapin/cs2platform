@@ -1,0 +1,89 @@
+{% load static %}
+<div class="ov-hero card-dark card-ring">
+  <div class="ov-hero-bg"
+       style="background-image:url('{% if tournament.poster %}{{ tournament.poster.url }}{% else %}{% static "img/tournaments/default-cover.jpg" %}{% endif %}');">
+  </div>
+  <div class="ov-hero-scrim"></div>
+
+  <div class="ov-hero-body">
+    <div class="ov-left">
+      <img class="ov-logo"
+           src="{% if tournament.logo %}{{ tournament.logo.url }}{% else %}{% static 'img/tournaments/default-logo.png' %}{% endif %}"
+           alt="logo">
+      <h1 class="ov-title">{{ tournament.name }}</h1>
+
+      <div class="ov-sub">
+        <span class="ov-host">Hosted by {{ tournament.created_by|default:"CS2 Platform" }}</span>
+        <span class="ov-sep">•</span>
+        <span class="ov-date">{{ tournament.start_date|date:"D, d M Y, H:i" }}</span>
+      </div>
+
+      <div class="ov-chips">
+        {% if tournament.status == "upcoming" %}
+          {% if tournament.registration_open %}
+            <span class="chip chip-success">Open</span>
+          {% else %}
+            <span class="chip chip-dark">Registration closed</span>
+          {% endif %}
+        {% elif tournament.status == "running" %}
+          <span class="chip chip-warning">Ongoing</span>
+        {% else %}
+          <span class="chip chip-muted">Finished</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="ov-right">
+      {% if can_join %}
+        <button type="button" class="btn btn-brand ov-join"
+                data-bs-toggle="modal" data-bs-target="#joinTournamentModal">
+          Join tournament
+        </button>
+      {% else %}
+        {% if already_registered %}
+          <button class="btn btn-outline-light ov-join" disabled>You're registered</button>
+        {% elif not tournament.is_open_for_registration %}
+          <button class="btn btn-outline-light ov-join" disabled>Registration closed</button>
+        {% else %}
+          <button class="btn btn-outline-light ov-join" disabled>Only team captains can join</button>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="ov-tabs card-dark card-ring">
+  <ul class="nav ov-nav nav-pills w-100">
+    <li class="nav-item">
+      <a class="nav-link {% if active_tab == 'overview' %}active{% endif %}"
+         href="{% url 'tournaments:overview' tournament.pk %}">Overview</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if active_tab == 'bracket' %}active{% endif %}"
+         href="{% url 'tournaments:bracket' tournament.pk %}">Bracket</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if active_tab == 'matches' %}active{% endif %}"
+         href="{% url 'tournaments:matches' tournament.pk %}">Matches</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if active_tab == 'teams' %}active{% endif %}"
+         href="{% url 'tournaments:teams' tournament.pk %}">Teams</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if active_tab == 'results' %}active{% endif %}"
+         href="{% url 'tournaments:results' tournament.pk %}">Results</a>
+    </li>
+
+    {# ---- RIGHT SIDE: Settings ---- #}
+    {% if can_manage %}
+      <li class="nav-item ms-auto">
+        <a class="nav-link {% if active_tab == 'settings' %}active{% endif %}"
+           href="{% url 'tournaments:settings' tournament.pk %}">
+          <i class="bi bi-gear me-1"></i>
+          <span class="d-none d-sm-inline">Settings</span>
+        </a>
+      </li>
+    {% endif %}
+  </ul>
+</div>

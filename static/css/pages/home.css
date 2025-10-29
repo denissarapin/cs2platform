@@ -1,0 +1,174 @@
+  .home-hero{
+    position:relative;
+    min-height: 56vh;
+    border-radius: 16px;
+    overflow: hidden;
+    display:grid;
+    place-items:center;
+    padding: clamp(24px, 6vw, 60px);
+    background:
+      linear-gradient(180deg, rgba(6,14,30,.85) 0%, rgba(6,14,30,.55) 40%, rgba(6,14,30,.75) 100%),
+      url("../../img/bg/home_hero_mirage.jpg") center/cover no-repeat;
+    box-shadow: 0 18px 48px rgba(2,6,23,.45);
+  }
+  /* «подмораживаем» картинку для читабельности */
+  .home-hero::before{
+    content:"";
+    position:absolute; inset:0;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    
+  }
+  .home-hero__inner{ position:relative; z-index:1; text-align:center; max-width: 1100px; }
+  .hero-title{
+    font-weight: 800;
+    line-height: 1.1;
+    font-size: clamp(28px, 6vw, 54px);
+    letter-spacing:.2px;
+    margin-bottom: 18px;
+  }
+  .hero-sub{ color: rgba(229,238,252,.75); margin-bottom: 24px; }
+
+  .hero-cta .btn{
+    font-weight:700;
+    border-radius: 12px;
+    padding: .8rem 1.1rem;
+    box-shadow: 0 8px 24px rgba(14,165,233,.18);
+  }
+  .btn-ghost{
+    color:#e5eefc; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.25);
+  }
+  .btn-ghost:hover{ background: rgba(255,255,255,.12); }
+  .btn-soft-primary{
+    color: #e6f3ff;
+    background: rgba(14,165,233,.14);
+    border: 1px solid rgba(14,165,233,.45);
+    border-radius: 12px;
+    box-shadow: 0 8px 18px rgba(14,165,233,.10);
+    }
+    .btn-soft-primary:hover{
+    background: rgba(14,165,233,.22);
+    border-color: rgba(14,165,233,.55);
+    box-shadow: 0 10px 22px rgba(14,165,233,.14);
+    }
+  /* ===== FEATURE CARDS ===== */
+  .feature-card{
+    background: linear-gradient(180deg, rgba(18,25,41,.92), rgba(12,18,32,.90));
+    border:1px solid rgba(148,163,184,.16);
+    border-radius:16px; padding:18px;
+    height:100%;
+    box-shadow: 0 12px 34px rgba(2,6,23,.35);
+  }
+  .feature-icon{
+    width:44px; height:44px; border-radius:50%;
+    display:grid; place-items:center;
+    background: rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.12);
+    margin-right:10px;
+  }
+  .feature-title{ font-weight:700; margin:0; }
+  .feature-text{ color: rgba(229,238,252,.72); margin:8px 0 0; }
+
+  /* ===== COMING SOON ===== */
+  .soon-pill{
+    background: rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.14);
+    padding:.55rem .8rem;
+    border-radius:999px;
+    display:inline-flex; align-items:center; gap:.45rem;
+    margin:.35rem;
+    white-space:nowrap;
+  }
+
+  /* ===== PLAYER HIGHLIGHTS ===== */
+  .player-card{
+    background: linear-gradient(180deg, rgba(18,25,41,.92), rgba(12,18,32,.90));
+    border:1px solid rgba(148,163,184,.16);
+    border-radius:16px; padding:16px;
+    display:flex; align-items:center; gap:14px;
+  }
+  .ph-avatar{
+    width:42px; height:42px; border-radius:50%; object-fit:cover;
+    border:1px solid rgba(255,255,255,.18);
+    background: rgba(255,255,255,.06);
+  }
+  .ph-name{ font-weight:700; margin:0; }
+  .ph-sub{ color: rgba(229,238,252,.65); font-size:.95rem; }
+
+  /* общие мелочи */
+  .grid-3{ display:grid; grid-template-columns: repeat(3,1fr); gap:16px; }
+  @media (max-width: 992px){ .grid-3{ grid-template-columns: 1fr; } }
+  .legends-grid{
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 16px;
+    margin-top: 18px;
+    }
+
+    .legend-card{
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 20px;              /* было меньше — чуть увеличили */
+    min-height: 104px;               /* было ~80–90 — сделали выше */
+    background: linear-gradient(180deg, var(--glass-1), var(--glass-2));
+    border: 1px solid rgba(148,163,184,.18);
+    border-radius: 16px;
+    box-shadow: 0 10px 28px rgba(2,6,23,.35);
+    }
+
+    .legend-avatar{
+    width: 56px;                     /* было 40–48 — увеличили */
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255,255,255,.15);
+    box-shadow: 0 6px 14px rgba(0,0,0,.35);
+    }
+
+    .legend-body .legend-name{
+    font-weight: 700;
+    line-height: 1.15;
+    }
+    .legend-body .legend-meta{
+    font-size: .95rem;
+    color: var(--muted);
+    }
+
+    /* голубая «галочка» */
+    .legend-verified{
+    display:inline-block;
+    margin-left:.4rem;
+    font-size:.9rem;
+    color:#60a5fa;
+    }
+
+    /* ==== Низ страницы — слоган ==== */
+    .home-strap{
+    text-align: center;
+    margin-top: 24px;     /* небольшой отступ от карточек */
+    margin-bottom: 48px;  /* «небольшой отступ снизу» */
+    color: var(--text);
+    }
+    .home-strap .strap-title{
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: .2px;
+    }
+    .home-strap .strap-sub{
+    color: var(--muted);
+    margin-top: .25rem;
+    }
+    .home-strap::after{
+    content:"";
+    display:block;
+    width: 120px;
+    height: 2px;
+    margin: 14px auto 0;
+    background: linear-gradient(90deg,
+        rgba(14,165,233,0),
+        rgba(14,165,233,.65),
+        rgba(14,165,233,0));
+    opacity: .9;
+    border-radius: 2px;
+    }

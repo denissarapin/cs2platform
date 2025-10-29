@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ mode.title }} — сервера{% endblock %}
+{% block body_class %}servers-page{% endblock %}
+
+{% block content %}
+
+{# Навигация по режимам #}
+<div class="mode-pill-row mb-3">
+  {% for code,title,color,cap in mode_nav %}
+    <a class="mode-chip {% if code == active_mode %}active{% endif %}"
+       href="{% url 'servers:mode' code %}">{{ title }}</a>
+  {% endfor %}
+</div>
+
+{# Карточки серверов #}
+<div class="srv-grid">
+  {% for s in servers %}
+    {# % заполнения #}
+    {% widthratio s.players s.capacity 100 as percent %}
+
+    <div class="srv-tile">
+      <div class="srv-bg" style="background-image:url('{% static s.thumb %}')"></div>
+      <div class="srv-overlay"></div>
+
+      {# Шкала. Делений = capacity. Цвет по порогам: <30 green, 30–70 yellow, >70 red.
+         Высота заливки ограничена 70%. #}
+      <div class="srv-meter
+           {% if percent|add:'0' > 70 %}meter-red
+           {% elif percent|add:'0' > 30 %}meter-yellow
+           {% else %}meter-green{% endif %}"
+           style="--segments: {{ s.capacity|default:1 }};">
+        <div class="srv-meter-fill"
+             style="height:{% if percent|add:'0' > 70 %}70{% else %}{{ percent }}{% endif %}%;">
+        </div>
+      </div>
+
+      <!-- TOP -->
+      <div class="srv-topline">
+        <span class="srv-topstat"><i class="bi bi-reception-4"></i> 128</span>
+        <h5 class="srv-title">#{{ s.num }} {{ mode.title|upper }}</h5>
+      </div>
+
+      <!-- BOTTOM -->
+      <div class="srv-bottomline">
+        <span>{{ s.players }}/{{ s.capacity }}</span>
+        <span class="meta-sep">|</span>
+        <span>{{ s.map }}</span>
+      </div>
+
+      <!-- RIGHT ACTIONS -->
+      <div class="srv-actions">
+        <button class="btn-ghost btn-copy" type="button" data-copy="{{ s.ip }}" aria-label="Скопировать IP">
+          <i class="bi bi-clipboard"></i>
+        </button>
+        <button class="btn-ghost" type="button" data-copy="connect {{ s.ip }}" aria-label="Скопировать команду connect">
+          <i class="bi bi-play-fill"></i>
+        </button>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

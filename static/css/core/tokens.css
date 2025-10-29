@@ -1,0 +1,16 @@
+:root{
+  --text:        #e5eefc;
+  --muted:       #b8c1d9;
+  --brand:       #0ea5e9;
+  --warn:        #f59e0b;
+  --danger:      #ef4444;
+  --success:     #22c55e;
+
+  --bg-dark-1:   #0b1220;
+  --glass-1:     rgba(18, 25, 41, .92);
+  --glass-2:     rgba(12, 18, 32, .88);
+
+  --radius-lg:   14px;
+  --radius-md:   12px;
+  --ring:        rgba(148,163,184,.14);
+}

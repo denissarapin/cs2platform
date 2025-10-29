@@ -1,0 +1,129 @@
+{# templates/teams/team_detail.html #}
+{% extends "base.html" %}
+{% load static %}
+{% block title %}[{{ team.tag }}] {{ team.name }}{% endblock %}
+{% block body_class %}teams-page{% endblock %}
+{% block content %}
+
+<div class="row g-4">
+
+  {# ===== ЛЕВАЯ КОЛОНКА: шапка + участники ===== #}
+  <div class="col-md-8">
+
+    <!-- Шапка команды -->
+    <div class="card card-dark card-ring shadow-sm mb-3">
+      <div class="card-body d-flex align-items-center gap-3">
+        {% if team.logo %}
+          <img src="{{ team.logo.url }}" class="team-logo-img" width="64" height="64" alt="logo">
+        {% else %}
+          <div class="team-logo-ph" aria-label="team logo placeholder">
+            <svg viewBox="0 0 24 24" width="36" height="36" aria-hidden="true">
+              <path fill="currentColor"
+                    d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-5 0-9 2.6-9 5.8A.2.2 0 0 0 3.2 20h17.6a.2.2 0 0 0 .2-.2C21 16.6 17 14 12 14Z"/>
+            </svg>
+          </div>
+        {% endif %}
+        <div class="flex-grow-1">
+          <h3 class="mb-1 text-white">[{{ team.tag }}] {{ team.name }}</h3>
+          <small class="text-white-50">Капитан: {{ team.captain.username }}</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Состав -->
+    <div class="card card-dark card-ring shadow-sm">
+      <div class="card-body">
+        <h5 class="mb-3 text-white">Состав</h5>
+        {% include "teams/_members_list.html" %}
+      </div>
+    </div>
+
+  </div>
+
+  {# ===== ПРАВАЯ КОЛОНКА: поиск игроков + инвайт-ссылка ===== #}
+  <div class="col-md-4">
+
+    {% if user.is_authenticated and team.captain_id == user.id %}
+      <!-- Поиск/приглашение игроков -->
+      <div class="card card-dark card-ring shadow-sm mb-3 invite-card">
+        <div class="card-body">
+          <h5 class="mb-3 text-white">Пригласить игрока</h5>
+
+          <div class="mb-3 position-relative" id="memberSearchWrap">
+            <input
+              id="memberSearch"
+              type="search"
+              name="q"
+              class="form-control form-control-dark"
+              placeholder="Добавить игрока"
+              autocomplete="off"
+              hx-get="{% url 'teams:user_search' team.slug %}"
+              hx-trigger="keyup changed delay:250ms, focus"
+              hx-target="#memberMenu"
+            >
+
+            <!-- Выпадающее меню с подсказками -->
+            <div
+              id="memberMenu"
+              class="dropdown-menu autosuggest-menu w-100 p-0"
+            >
+              <div class="p-2 text-white-50 small">Начните вводить ник…</div>
+            </div>
+          </div>
+
+          <!-- Исходящие приглашения -->
+          <div id="outgoingInvites" class="mb-1">
+            {% include "teams/_invites_outgoing.html" with team=team outgoing=outgoing_invites %}
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- Пригласить по ссылке -->
+    <div class="card card-dark card-ring shadow-sm mb-3">
+      <div class="card-body">
+        <h5 class="text-white">Пригласить по ссылке</h5>
+        <input type="text" class="form-control form-control-dark mb-2"
+               readonly value="{{ invite_link }}" onclick="this.select()">
+        <small class="text-white-50">Отправьте ссылку игрокам. Авторизованный пользователь присоединится к команде.</small>
+      </div>
+    </div>
+
+    {% if user.is_authenticated %}
+      {% if user.id == team.captain_id %}
+        <div class="alert alert-info">Вы — капитан команды.</div>
+      {% else %}
+        <a href="{% url 'teams:leave_team' slug=team.slug %}" class="btn btn-outline-danger w-100">Покинуть команду</a>
+      {% endif %}
+    {% endif %}
+  </div>
+</div>
+
+{# JS для открытия/закрытия выпадающего меню поиска #}
+<script>
+(function(){
+const input = document.getElementById('memberSearch');
+  const menu  = document.getElementById('memberMenu');
+  if (!input || !menu) return;
+
+  // показываем меню, когда прилетели результаты GET-поиска
+  document.body.addEventListener('htmx:afterOnLoad', (e) => {
+    if (e.detail.target === menu && e.detail.xhr?.method === 'GET') {
+      if (menu.innerHTML.trim()) menu.classList.add('show');
+    }
+  });
+
+  input.addEventListener('focus', () => {
+    if (menu.innerHTML.trim()) menu.classList.add('show');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!menu.contains(e.target) && e.target !== input) menu.classList.remove('show');
+  });
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') menu.classList.remove('show');
+  });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ tournament.name }} — Overview{% endblock %}
+{% block body_class %}tournaments-page{% endblock %}
+
+{% block content %}
+
+  {# общий верх: hero + tabs #}
+  {% include "tournaments/_hero.html" with active_tab="overview" %}
+
+  {# ===== GRID BELOW HERO ===== #}
+  <div class="ov-grid">
+
+    {# --- FORMAT --- #}
+    <section class="ov-card">
+      <div class="ov-card-h">Format</div>
+      {% with game="CS2" team_size="5v5" match_format="Single Elimination (BO1)" %}
+        <ul class="ov-list">
+          <li><span class="ov-k">Game</span><span class="ov-v">{{ game }}</span></li>
+          <li><span class="ov-k">Team size</span><span class="ov-v">{{ team_size }}</span></li>
+          <li><span class="ov-k">Match format</span><span class="ov-v">{{ match_format }}</span></li>
+        </ul>
+      {% endwith %}
+    </section>
+
+    {# --- TEAMS / SLOTS --- #}
+    <section class="ov-card">
+      <div class="ov-card-h">Teams</div>
+      <div class="ov-kpis">
+        <div class="ov-kpi">
+          <div class="ov-kpi-num">{{ registered_count }}</div>
+          <div class="ov-kpi-sub">Registered</div>
+        </div>
+        <div class="ov-kpi">
+          <div class="ov-kpi-num">{{ ready_count }}</div>
+          <div class="ov-kpi-sub">Ready</div>
+        </div>
+        <div class="ov-kpi">
+          <div class="ov-kpi-num">{{ tournament.max_teams }}</div>
+          <div class="ov-kpi-sub">Slots</div>
+        </div>
+      </div>
+      <div class="ov-progress">
+        <div class="ov-progress-fill" style="width: {{ registered_pct }}%;"></div>
+      </div>
+      <div class="ov-progress-sub">
+        {{ registered_count }} / {{ tournament.max_teams }} (free: {{ tournament.slots_left }})
+      </div>
+    </section>
+
+    {# --- TIMELINE --- #}
+    <section class="ov-card ov-timeline">
+      <div class="ov-card-h">Timeline</div>
+      <ol class="ov-steps">
+        <li>
+          <div class="ov-step-date">
+            {{ ready_open|date:"d M" }} <span>{{ ready_open|date:"H:i" }}</span>
+          </div>
+          <div class="ov-step-body">
+            <div class="ov-step-title">Ready window opens</div>
+            <div class="ov-step-sub">Verify you're eligible to play.</div>
+          </div>
+        </li>
+        <li>
+          <div class="ov-step-date">
+            {{ registration_close|date:"d M" }} <span>{{ registration_close|date:"H:i" }}</span>
+          </div>
+          <div class="ov-step-body">
+            <div class="ov-step-title">Registration closes</div>
+            <div class="ov-step-sub">
+              {% if tournament.registration_open %}Open now{% else %}Closed{% endif %}
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="ov-step-date">
+            {{ ready_close|date:"d M" }} <span>{{ ready_close|date:"H:i" }}</span>
+          </div>
+          <div class="ov-step-body">
+            <div class="ov-step-title">Ready window closes</div>
+            <div class="ov-step-sub">No further ready-ups are accepted.</div>
+          </div>
+        </li>
+        <li>
+          <div class="ov-step-date">
+            {{ tournament.start_date|date:"d M" }} <span>{{ tournament.start_date|date:"H:i" }}</span>
+          </div>
+          <div class="ov-step-body">
+            <div class="ov-step-title">Start</div>
+            <div class="ov-step-sub">Tournament starts; you'll get notified.</div>
+          </div>
+        </li>
+        {% if tournament.end_date %}
+        <li>
+          <div class="ov-step-date">
+            {{ tournament.end_date|date:"d M" }} <span>{{ tournament.end_date|date:"H:i" }}</span>
+          </div>
+          <div class="ov-step-body">
+            <div class="ov-step-title">End</div>
+            <div class="ov-step-sub">Tournament ends.</div>
+          </div>
+        </li>
+        {% endif %}
+      </ol>
+    </section>
+
+    {# --- INFORMATION --- #}
+    <section class="ov-card ov-info">
+      <h3 class="ov-card-h">Information</h3>
+      <div class="ov-info-body">
+        {% if tournament.description %}
+          {{ tournament.description|linebreaksbr|urlize }}
+        {% endif %}
+      </div>
+    </section>
+
+  </div>
+
+  {# модалка Join (общая для всех вкладок) #}
+  {% include "tournaments/_join_modal.html" %}
+
+{% endblock %}

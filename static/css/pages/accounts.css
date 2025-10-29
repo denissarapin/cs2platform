@@ -1,0 +1,65 @@
+.input-group-text{ color: var(--text); background:#0f172a; border:1px solid rgba(148,163,184,.22); }
+
+.btn{ color:#061018; font-weight:600; }
+.btn-primary{ background: var(--brand); border-color: var(--brand); }
+.btn-primary:hover{ filter: brightness(1.06); }
+.btn-outline-primary{ color: var(--text); border-color: var(--brand); }
+.btn-outline-primary:hover{ background: var(--brand); color:#001018; }
+.btn-dark{ background: #111827; border-color:#0b1220; color: var(--text); }
+.btn-outline-danger{ color:#ffd6d6; border-color:#ef4444; }
+.btn-outline-danger:hover{ background:#ef4444; color:#1a0c0c; }
+
+.avatar-sm{ width:32px; height:32px; object-fit:cover; border-radius:50%; }
+
+#copySteamBtn, .toggle-btn{
+    color: #fff !important;
+    background: rgba(255,255,255,.04);
+    border-color: rgba(255,255,255,.35) !important;
+    transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+#copySteamBtn:hover, .toggle-btn:hover{
+    background: rgba(255,255,255,.10);
+    border-color: rgba(255,255,255,.45) !important;
+}
+#copySteamBtn:active, .toggle-btn:active{ background: rgba(255,255,255,.14); }
+#copySteamBtn:focus-visible, .toggle-btn:focus-visible{ outline: none; box-shadow: 0 0 0 3px rgba(14,165,233,.35); }
+.toggle-btn .toggle-chev{ color:#fff !important; }
+#copySteamBtn:disabled, .toggle-btn:disabled{
+    opacity: .6; background: rgba(255,255,255,.02); border-color: rgba(255,255,255,.25) !important; cursor: not-allowed;
+}
+
+#mapsOrderBtn, a.btn-open-faceit, a[href*="faceit.com"][class*="btn"]{
+    color:#fff !important; background: rgba(255,255,255,.04) !important; border-color: rgba(255,255,255,.35) !important;
+    transition: background .15s ease, border-color .15s ease, box-shadow .15s ease; box-shadow: none;
+}
+#mapsOrderBtn:hover, a.btn-open-faceit:hover, a[href*="faceit.com"][class*="btn"]:hover{
+    background: rgba(255,255,255,.10) !important; border-color: rgba(255,255,255,.45) !important;
+}
+#mapsOrderBtn:active, a.btn-open-faceit:active, a[href*="faceit.com"][class*="btn"]:active{ background: rgba(255,255,255,.14) !important; }
+#mapsOrderBtn:focus-visible, a.btn-open-faceit:focus-visible, a[href*="faceit.com"][class*="btn"]:focus-visible{
+    outline: none; box-shadow: 0 0 0 3px rgba(14,165,233,.35);
+}
+#mapsOrderBtn i, #mapsOrderBtn svg, a.btn-open-faceit i, a.btn-open-faceit svg,
+a[href*="faceit.com"][class*="btn"] i, a[href*="faceit.com"][class*="btn"] svg{ color:#fff; fill:#fff; }
+
+
+    .kpi{
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius-md);
+      color: var(--text);
+    }
+    .kpi h6{ margin:0; font-weight:600; opacity:.9; }
+    .kpi .value{ font-size:1.35rem; font-weight:800; line-height:1.2; }
+
+    .badge-game{ background: var(--brand); color:#001018; border-radius: 999px; padding:.25rem .6rem; font-size:.75rem; font-weight:700; }
+
+    .progress{ background-color: rgba(255,255,255,.12); }
+    .progress-bar.bg-warning{ background-color: var(--warn) !important; }
+    .progress-bar.bg-danger { background-color: var(--danger) !important; }
+    .progress-bar.bg-success{ background-color: var(--success) !important; }
+    .progress-bar{ background-color: var(--brand); }
+
+    .form-control, .form-select{ color: var(--text); background:#0f172a; border:1px solid rgba(148,163,184,.22); }
+    .form-control::placeholder{ color: rgba(232,237,255,.55); }
+    

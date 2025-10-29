@@ -1,0 +1,243 @@
+{% load static %}
+
+{% with connect=connect_cmd|default:match.connect_string %}
+
+{# 1) Пока вето НЕ завершено — показываем полноэкранную карточку с сеткой карт #}
+{% if not final_map %}
+  <section class="ov-card card-dark card-ring veto-full">
+    {% if match.veto_deadline %}
+      <div class="veto-timer-bar">
+        <div id="veto-timer"
+             class="timer-chip"
+             data-deadline="{{ match.veto_deadline|date:'U' }}000">
+          <span class="chip chip-glass">00:30</span>
+        </div>
+        {% if current_team %}
+          <div class="timer-turn ">
+            Ход команды: <b>{{ current_team.name }}</b>
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <div class="veto-grid">
+      {% for code,label in map_pool %}
+        <div class="veto-card {% if code not in available_codes %}disabled{% endif %}">
+          <img src="{% static 'img/maps/' %}{{ code }}.jpg" alt="{{ label }}">
+          <div class="vc-body">
+            <div class="vc-title">{{ label }}</div>
+            {% if code in available_codes %}
+              <button type="button" class="btn btn-danger btn-sm ban-btn" data-map="{{ code }}">Забанить</button>
+            {% else %}
+              <span class="chip chip-dark">Забанена</span>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+{% else %}
+<section class="ov-card final-card">
+  <div class="final-head">
+    <span class="label">Финальная карта:</span>
+    <span class="chip chip-glass">{{ final_map.1 }}</span>
+  </div>
+
+  <div class="final-media">
+    <img
+      src="{% static 'img/maps/' %}{{ final_map.0 }}.jpg"
+      alt="{{ final_map.1 }}"
+      class="final-img"
+    >
+  </div>
+
+  {% if connect %}
+  <div class="final-server">
+    <code id="srv-cmd" class="final-cmd">{{ connect }}</code>
+    <div class="final-actions">
+      <button type="button" class="btn btn-outline-light btn-sm" id="copySrv">Скопировать</button>
+      <a
+        class="btn btn-brand btn-sm"
+        id="joinSrv"
+        href="steam://rungameid/730//+{{ connect|urlencode }}"
+      >Подключиться</a>
+    </div>
+  </div>
+  {% endif %}
+</section>
+{% endif %}
+
+{% endwith %}
+
+<style>
+  /* --- список действий вето --- */
+  .ban-list{ list-style:none; padding:0; margin:0; }
+  .ban-list li{
+    display:flex; gap:10px; align-items:center;
+    padding:8px 10px; color:#e6eeff;
+    background:rgba(255,255,255,.02); border:1px solid rgba(148,163,184,.12);
+    border-radius:10px;
+  }
+  .ban-list li + li{ margin-top:8px; }
+  .ban-list .idx{ opacity:.6; width:20px; text-align:right; }
+  .ban-list .who{ font-weight:800; }
+  .ban-list .act{ opacity:.75; }
+  .ban-list .map{ font-weight:900; color:#d1ffe1; }
+
+  /* --- итоговая карта --- */
+  .final-card{
+  max-width: 550px;
+  margin: 0 auto;            /* центрируем саму карточку */
+  padding: 0px;
+  padding-bottom: 10px;
+  margin-top: 10px;
+  
+}
+
+.final-head{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  color:#e6eeff;
+  font-weight:900;
+  margin-top: 10px;
+  margin-bottom:12px;
+}
+
+.final-media{
+  display:flex;
+  justify-content:center;
+  margin-bottom:12px;
+}
+#copySrv.btn,
+.final-actions .btn-outline-light{
+  color:#e6eeff !important;
+  border-color:rgba(255,255,255,.45) !important;
+}
+
+.final-actions .btn-outline-light:hover{
+  background:rgba(255,255,255,.12) !important;
+}
+.final-img{
+  width:100%;
+  max-width:560px;           /* размер самой картинки */
+  border-radius:14px;
+  border:1px solid rgba(148,163,184,.18);
+  box-shadow:0 12px 30px rgba(2,6,23,.45);
+}
+
+.final-server{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+}
+
+.final-cmd{
+  padding:.4rem .6rem;
+  background: rgba(255,255,255,.06);
+  border:1px solid rgba(148,163,184,.22);
+  border-radius:8px;
+  color:#e6eeff;
+  user-select:text;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+}
+
+.final-actions{
+  display:flex;
+  gap:8px;
+} 
+
+  /* --- полноэкранное вето --- */
+  .veto-full{
+    position: relative; /* для абсолютного позиционирования таймера */
+    padding: 14px;
+  }
+  .veto-toolbar .badge{ font-size:.85rem; }
+  .veto-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap:12px;
+  }
+  .veto-card{
+    overflow:hidden; border-radius:14px; color:#e6eeff;
+    background:linear-gradient(180deg, rgba(16,23,38,.80), rgba(10,16,28,.82));
+    border:1px solid rgba(148,163,184,.18);
+  }
+  .veto-card img{ width:100%; height:160px; object-fit:cover; display:block; }
+  .veto-card .vc-body{ padding:10px; display:flex; justify-content:space-between; align-items:center; }
+  .veto-card .vc-title{ font-weight:900; }
+  .veto-card.disabled{ opacity:.55; }
+
+  /* --- блок сервера --- */
+  .server-cmd{
+    padding:.35rem .55rem;
+    background: rgba(255,255,255,.06);
+    border:1px solid rgba(148,163,184,.22);
+    border-radius:8px;
+    color:#e6eeff;
+    user-select:text;
+  }
+  .veto-timer-overlay{
+  position: absolute;
+  top: 8px;
+  left: 0; right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;           /* по центру по горизонтали */
+  gap: 6px;
+  pointer-events: none;          /* клики проходят сквозь */
+}
+
+.timer-chip .chip{
+  font-size: 1.15rem;            /* крупнее */
+  padding: .4rem .9rem;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(2,6,23,.45);
+}
+.veto-timer-bar{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  margin-bottom:10px;   /* отступ вниз, чтобы сетка не прилипала */
+}
+
+.timer-turn{
+  color:#e6eeff; 
+  font-size:.9rem;
+  text-shadow:0 2px 8px rgba(0,0,0,.35);
+}
+</style>
+
+<script>
+(function(){
+  // Таймер до дедлайна вето
+  const t = document.getElementById('veto-timer');
+  if (t && t.dataset.deadline) {
+    const deadline = parseInt(t.dataset.deadline, 10);
+    function tick(){
+      const s = Math.max(0, Math.floor((deadline - Date.now())/1000));
+      const mm = String(Math.floor(s/60)).padStart(2,'0');
+      const ss = String(s%60).padStart(2,'0');
+      const badge = t.querySelector('.chip') || t; 
+      badge.textContent = `${mm}:${ss}`;
+      if (s > 0) setTimeout(tick, 250);
+    }
+    tick();
+  }
+
+  // Копирование connect-строки
+  const copyBtn = document.getElementById('copySrv');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      const cmd = document.getElementById('srv-cmd')?.textContent?.trim();
+      if (cmd && navigator.clipboard) {
+        navigator.clipboard.writeText(cmd);
+      }
+    });
+  }
+})();
+</script>

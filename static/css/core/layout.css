@@ -1,0 +1,155 @@
+html, body { height: 100%; }
+body { color: var(--text); background-color: var(--bg-dark-1); }
+
+/* ===== BG ===== */
+body::before{
+    content:"";
+    position:fixed; inset:0; z-index:-1;
+    background:
+    radial-gradient(1200px 300px at 100% -10%, rgba(245,158,11,.25) 0, rgba(245,158,11,0) 70%),
+    radial-gradient(80% 60% at 50% 0%, rgba(6,20,45,.55) 0%, rgba(6,20,45,.25) 55%, rgba(6,20,45,0) 100%),
+    linear-gradient(to bottom, rgba(8,14,30,.92) 0%, rgba(8,14,30,.78) 40%, rgba(8,14,30,.80) 100%),
+    url("../../img/bg/cs2_blue_blur_1920x1080.jpg") center top / cover no-repeat;
+    filter: brightness(.90) saturate(110%);
+    background-attachment: fixed;
+}
+@media (max-width: 768px){ body::before{ background-attachment: scroll; } }
+
+/* ===== NAVBAR ===== */
+.navbar{
+    background: rgba(13,18,28,.65) !important;
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--ring);
+    box-shadow: 0 2px 6px rgba(0,0,0,.3);
+    z-index: 2001;
+}
+.navbar-brand{ font-weight:700; letter-spacing:.5px; color:var(--text) !important; }
+.navbar-nav .nav-link{ color:var(--text) !important; opacity:.9; transition:.2s; }
+.navbar-nav .nav-link:hover{ color:#ffd166 !important; opacity:1; }
+.nav-link.text-danger:hover{ color:#ff6b6b !important; }
+
+/* ===== LINKS ===== */
+a, .link-dark, .link-dark:visited { color: var(--text) !important; text-decoration: none; }
+a:hover { color: #ffffff !important; opacity: .95; }
+
+    /* ===== Notifications (bell) ===== */
+.notif-menu{
+    width: 420px;                 /* было 360 – сделали шире */
+    background: linear-gradient(180deg, var(--glass-1), var(--glass-2));
+    color: var(--text);
+    border: 1px solid rgba(148,163,184,.22);
+    border-radius: 14px;
+    backdrop-filter: blur(10px) saturate(120%);
+    -webkit-backdrop-filter: blur(10px) saturate(120%);
+    box-shadow:
+    0 16px 40px rgba(2,6,23,.55),
+    inset 0 1px 0 rgba(255,255,255,.08);
+    z-index: 2005;
+    overflow: hidden;
+}
+
+/* Шапка внутри дропдауна */
+.notif-head{
+    background: rgba(255,255,255,.03);
+    border-bottom: 1px solid rgba(255,255,255,.12);
+}
+#notifBtn .notif-badge{
+    font-size: .65rem;          /* меньше текст */
+    padding: .12rem .32rem;     /* меньше отступы */
+    line-height: 1;
+    transform: translate(-35%, -35%); /* чуть ближе к иконке */
+    border: 2px solid rgba(11,18,32,.9); /* тонкая кайма как у Discord */
+}
+/* элементы внутри */
+.notif-menu .dropdown-item,
+.notif-menu a,
+.notif-menu button{
+    color: var(--text);
+}
+.notif-menu .dropdown-item:hover{
+    background: rgba(255,255,255,.06);
+}
+
+/* тонкая светлая граница между уведомлениями, если они <li> */
+.notif-menu .list-group-item{
+    background: transparent;
+    color: var(--text);
+    border-color: rgba(255,255,255,.12);
+}
+
+/* кнопки в меню — в той же стиле */
+.notif-menu .btn{
+    box-shadow: none;
+}
+.notif-menu .btn-outline-light{
+    border-color: rgba(255,255,255,.35);
+}
+.notif-menu .btn-outline-light:hover{
+    background: rgba(255,255,255,.10);
+    border-color: rgba(255,255,255,.45);
+}
+    .btn-bell{ color:#e7f0ff; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.25); }
+    .btn-bell:hover{ background: rgba(255,255,255,.10); }
+
+
+.navbar .auth-btn{
+  --ring: 0 0 0 0 rgba(59,130,246,.45);
+  --y: 0;
+  padding: .45rem .95rem;
+  border-radius: 999px;
+  font-weight: 600;
+  letter-spacing: .2px;
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease, opacity .18s ease;
+  transform: translateY(var(--y));
+}
+
+/* Войти: стеклянная ghost */
+.navbar .btn-login{
+  color: #e5e7eb;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.18);
+  backdrop-filter: blur(6px) saturate(120%);
+  -webkit-backdrop-filter: blur(6px) saturate(120%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.04),
+    0 8px 22px rgba(2,6,23,.35);
+}
+.navbar .btn-login:hover{
+  background: rgba(255,255,255,.10);
+  border-color: rgba(255,255,255,.32);
+  --y: -1px;
+}
+.navbar .btn-login:focus-visible{
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59,130,246,.40), 0 10px 28px rgba(2,6,23,.45);
+}
+
+/* Регистрация: неон-градиент */
+.navbar .btn-register{
+  color: #0b1020;
+  background: linear-gradient(135deg,#22d3ee 0%, #3b82f6 45%, #8b5cf6 100%);
+  border: 0;
+  background-size: 200% 200%;
+  box-shadow:
+    0 10px 28px rgba(59,130,246,.35),
+    inset 0 1px 0 rgba(255,255,255,.35);
+}
+.navbar .btn-register:hover{
+  background-position: 100% 0%;
+  filter: saturate(115%) contrast(105%);
+  --y: -1px;
+}
+.navbar .btn-register:focus-visible{
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgba(59,130,246,.45),
+    0 16px 36px rgba(59,130,246,.45);
+}
+
+/* Размер sm, чтобы смотрелись аккуратно в хедере */
+.navbar .auth-btn.btn-sm{ padding: .35rem .8rem; font-size: .9rem; }
+
+/* Тёмной теме — лёгкая подсветка при hover */
+@media (hover:hover){
+  .navbar .auth-btn:hover{ transform: translateY(var(--y)); }
+}

@@ -1,0 +1,374 @@
+{% extends "base.html" %}
+{% block title %}Профиль{% endblock %}
+{% load static %}
+{% block content %}
+<style>
+
+  .level-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px; height: 36px;
+    border-radius: 999px;
+    background: #111827;
+    color: #fbbf24;
+    font-weight: 700;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .level-icon { display:inline-block; vertical-align:middle; }
+  .kpi {
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 14px;
+  }
+  .kpi h6 {
+    margin: 0; font-weight: 600; opacity: .7;
+  }
+  .kpi .value {
+    font-size: 1.4rem; font-weight: 800; line-height: 1.2;
+  }
+  .badge-game {
+    background: #0ea5e9; color: #fff; border-radius: 999px; padding: .25rem .6rem; font-size: .75rem;
+  }
+  .faceit-header .nickname {
+    font-size: 1.1rem; font-weight: 700;
+  }
+  .btn-soft {
+    border: 1px solid rgba(0,0,0,.08);
+  }
+  .toggle-chev{display:inline-block;transition:transform .2s ease}
+  .toggle-btn[aria-expanded="true"] .toggle-chev{transform:rotate(180deg)}
+</style>
+<div class="container my-5">
+
+  <!-- HERO -->
+  <div class="card card-dark card-ring shadow-sm p-4 mb-4">
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+      <div>
+        <div class="h3 mb-1 text-white">{{ user.username }}</div>
+        <div class="text-white-50">{{ user.email }}</div>
+      </div>
+      {% if faceit %}
+        <div class="text-md-end">
+          <div class="small text-white-50">Текущая игра Faceit</div>
+          <div class="h5 mb-0 text-white">{{ faceit.game|default:"CS2"|upper }}</div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- STEAM -->
+    <div class="col-lg-4">
+      <div class="card card-dark card-ring shadow-sm h-100">
+        <div class="card-body">
+          <h5 class="mb-3 text-white">🎮 Steam аккаунт</h5>
+
+          {% if steam %}
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="d-flex align-items-center gap-3">
+                {% if steam.avatar %}
+                  <img src="{{ steam.avatar }}" alt="" width="42" height="42" class="rounded-circle">
+                {% endif %}
+                <div>
+                  <div class="fw-bold">
+                    <a href="{{ steam.url }}" target="_blank" rel="noopener" class="text-white text-decoration-none">
+                      {{ steam.name|default:"Профиль Steam" }}
+                    </a>
+                    {% if steam.source == "manual" %}
+                      <span class="badge bg-info ms-2">введён вручную</span>
+                    {% endif %}
+                  </div>
+                  <div class="text-white-50 small">ID: <span id="steamIdText">{{ steam.id }}</span></div>
+                </div>
+              </div>
+              <button class="btn btn-outline-light btn-sm" id="copySteamBtn" type="button">Копировать ID</button>
+            </div>
+
+            {% if user.steam_id %}
+              <a href="{% url 'steam_disconnect' %}" class="btn btn-outline-danger w-100 mt-2">🚪 Отключить Steam</a>
+            {% endif %}
+          {% else %}
+            {% if user.steam_id %}
+              <div class="mb-2 text-white"><b>Steam ID:</b> <span id="steamIdText">{{ user.steam_id }}</span></div>
+              <a href="https://steamcommunity.com/profiles/{{ user.steam_id }}" target="_blank" rel="noopener" class="btn btn-outline-light btn-sm">Открыть в Steam ↗</a>
+              <a href="{% url 'steam_disconnect' %}" class="btn btn-outline-danger w-100 mt-2">🚪 Отключить Steam</a>
+            {% else %}
+              <p class="text-white-50">Подключи Steam, чтобы мы нашли твой Faceit.</p>
+              <a href="{% url 'connect_steam' %}" class="btn btn-outline-light w-100">🔗 Подключить Steam</a>
+            {% endif %}
+          {% endif %}
+
+          <hr class="my-3 border-secondary">
+
+          <form method="post" action="{% url 'profile' %}" class="mt-2">
+            {% csrf_token %}
+            <label class="form-label mb-1 text-white-50">Введите SteamID64, ссылку или alias</label>
+            <div class="input-group">
+              {{ lookup_form.steam_id }}
+              <button class="btn btn-primary" type="submit">Найти Faceit</button>
+            </div>
+            {% if lookup_form.steam_id.errors %}
+              <div class="text-danger small mt-2">{{ lookup_form.steam_id.errors.0 }}</div>
+            {% endif %}
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- FACEIT (без карты — только шапка и KPI) -->
+    <div class="col-lg-8">
+      <div class="card card-dark card-ring shadow-sm h-100">
+        <div class="card-body">
+          <h5 class="mb-3 text-white">🟠 Faceit</h5>
+
+          {% if faceit %}
+            <!-- Header -->
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <div class="d-flex align-items-center gap-3">
+                {% if faceit.avatar %}
+                  <img src="{{ faceit.avatar }}" alt="" width="56" height="56" class="rounded-circle">
+                {% else %}
+                  <div class="rounded-circle bg-secondary d-inline-flex align-items-center justify-content-center" style="width:56px;height:56px;">👤</div>
+                {% endif %}
+                <div>
+                  <div class="nickname">
+                    <a href="https://www.faceit.com/en/players/{{ faceit.nickname }}"
+                       class="text-white text-decoration-none" target="_blank" rel="noopener">
+                      {{ faceit.nickname }}
+                    </a>
+                  </div>
+                  <div class="d-flex align-items-center gap-2 mt-1">
+                    {% with lvl=faceit.level|default:0 %}
+                      {% if lvl %}
+                        <img
+                          src="{% static 'img/faceit/levels/skill_level_' %}{{ lvl }}.png"
+                          alt="Faceit Level {{ lvl }}"
+                          width="35" height="35"
+                          class="level-icon"
+                          loading="lazy">
+                      {% else %}
+                        <span class="badge bg-secondary">LVL —</span>
+                      {% endif %}
+                    {% endwith %}
+                    <span class="badge-game">{{ faceit.game|default:"CS2"|upper }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="text-end">
+                <div class="small text-white-50">ELO</div>
+                <div class="display-6 mb-0 text-white" style="font-size:2rem;">{{ faceit.elo|default:"—" }}</div>
+                <a href="https://www.faceit.com/en/players/{{ faceit.nickname }}"
+                   class="btn btn-open-faceit btn-sm mt-2" target="_blank" rel="noopener">Открыть на Faceit ↗</a>
+              </div>
+            </div>
+
+            {% if faceit.lifetime %}
+              <!-- KPIs -->
+              <div class="row g-3">
+                <div class="col-12 col-md-4">
+                  <div class="p-3 kpi kpi-dark">
+                    <h6 class="text-white-50">Матчей</h6>
+                    <div class="value text-white">{{ faceit.lifetime.matches|default:"—" }}</div>
+                  </div>
+                </div>
+                <div class="col-12 col-md-4">
+                  <div class="p-3 kpi kpi-dark">
+                    <h6 class="text-white-50">Средний K/D</h6>
+                    <div class="value text-white">{{ faceit.lifetime.kd_avg|floatformat:2|default:"—" }}</div>
+                  </div>
+                </div>
+                <div class="col-12 col-md-4">
+                  <div class="p-3 kpi kpi-dark">
+                    <h6 class="text-white-50">Win Rate</h6>
+                    <div class="value text-white">{{ faceit.lifetime.winrate|floatformat:1|default:"—" }}%</div>
+                    {% with wr=faceit.lifetime.winrate|default:0 %}
+                      <div class="progress mt-2" style="height:8px;">
+                        <div class="progress-bar" style="width: {{ wr }}%;" role="progressbar"
+                             aria-valuenow="{{ wr }}" aria-valuemin="0" aria-valuemax="100"></div>
+                      </div>
+                    {% endwith %}
+                  </div>
+                </div>
+              </div>
+
+            {% endif %}
+
+          {% else %}
+            <div class="text-white-50">
+              {% if faceit_error %}{{ faceit_error }}{% else %}
+                Подключите Steam или введите SteamID / ссылку / alias вручную.
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- === ОБЩАЯ КАРТОЧКА НА ВСЮ ШИРИНУ: СТАТИСТИКА ПО КАРТАМ === -->
+  {% if faceit and faceit.maps %}
+  <div class="row g-4 mt-1">
+    <div class="col-12" id="mapsCard">
+      <div class="card card-dark card-ring shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between">
+            <h5 class="mb-0 text-white">Статистика по картам</h5>
+            <div class="d-flex align-items-center gap-2">
+              <div class="input-group input-group-sm" style="width: 260px;">
+                <label class="input-group-text" for="mapsSort">Сортировка</label>
+                <select id="mapsSort" class="form-select">
+                  <option value="matches">Матчи</option>
+                  <option value="winrate">Win Rate</option>
+                  <option value="kd">K/D</option>
+                </select>
+                <button class="btn btn-outline-light" id="mapsOrderBtn" type="button" title="Порядок">↓</button>
+              </div>
+
+              <button class="btn btn-outline-light btn-sm toggle-btn"
+                      type="button"
+                      data-bs-toggle="collapse"
+                      data-bs-target="#mapsCollapseWide"
+                      aria-expanded="false"
+                      aria-controls="mapsCollapseWide">
+                Показать / скрыть <span class="toggle-chev ms-1">▾</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="collapse mt-3" id="mapsCollapseWide">
+            <div class="row g-3 maps-grid">
+              {% for m in faceit.maps %}
+                <div class="col-12 col-md-6 col-lg-4"
+                     data-matches="{{ m.matches|default:0 }}"
+                     data-winrate="{{ m.winrate|default:0 }}"
+                     data-kd="{{ m.kd|default:0 }}">
+                  <div class="p-3 kpi kpi-dark">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                      <span class="fw-bold text-white">{{ m.name }}</span>
+                      {% if m.winrate %}
+                        <span class="badge bg-secondary text-white">{{ m.winrate|floatformat:0 }}%</span>
+                      {% endif %}
+                    </div>
+                    <div class="small text-white-50">Матчей: <b class="text-white">{{ m.matches }}</b></div>
+                    <div class="small text-white-50">K/D: <b class="text-white">{{ m.kd|floatformat:2|default:"—" }}</b></div>
+
+                    {% if m.winrate %}
+                      <div class="progress mt-2" style="height:6px;">
+                        {% with wr=m.winrate|default:0 %}
+                          <div class="progress-bar {% if wr < 45 %}bg-danger{% elif wr > 55 %}bg-success{% else %}bg-warning{% endif %}"
+                               style="width: {{ wr }}%;"
+                               role="progressbar"
+                               aria-valuenow="{{ wr|floatformat:0 }}"
+                               aria-valuemin="0" aria-valuemax="100"></div>
+                        {% endwith %}
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+<script>(() => {
+  const btn = document.getElementById('copySteamBtn');
+  const el  = document.getElementById('steamIdText');
+  if (!btn || !el) return;
+
+  btn.addEventListener('click', async () => {
+    const text = el.textContent.trim();
+    try {
+      await navigator.clipboard.writeText(text);
+      btn.textContent = 'Скопировано';
+    } catch {
+      const r = document.createRange(); r.selectNode(el);
+      const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+      document.execCommand('copy'); sel.removeAllRanges();
+      btn.textContent = 'Скопировано';
+    }
+    setTimeout(() => btn.textContent = 'Копировать ID', 1500);
+  });
+})();
+
+/* --- карты: разворот + сортировка --- */
+(() => {
+  const KEY_EXP   = 'faceit:maps:expanded';
+  const KEY_SORT  = 'faceit:maps:sort';
+  const KEY_ORDER = 'faceit:maps:order'; // 'asc' | 'desc'
+
+  // новый id общего блока
+  const COLLAPSE_ID = 'mapsCollapseWide';
+
+  const collapseEl = document.getElementById(COLLAPSE_ID);
+  const toggleBtn  = document.querySelector(`.toggle-btn[data-bs-target="#${COLLAPSE_ID}"]`);
+  const grid       = document.querySelector(`#${COLLAPSE_ID} .maps-grid`);
+  const sortSel    = document.getElementById('mapsSort');
+  const orderBtn   = document.getElementById('mapsOrderBtn');
+
+  // если нет сетки/контролов — нечего делать
+  if (!grid || !sortSel || !orderBtn) return;
+
+  /* ---- разворот / сворачивание ---- */
+  if (collapseEl && toggleBtn) {
+    const setToggleLabel = (exp) => {
+      toggleBtn.innerHTML = (exp ? 'Скрыть ' : 'Показать ')
+        + '<span class="d-none d-sm-inline">статистику</span><span class="toggle-chev ms-1">▾</span>';
+      toggleBtn.setAttribute('aria-expanded', String(exp));
+    };
+
+    // восстановить состояние
+    const savedExp = localStorage.getItem(KEY_EXP) === 'true';
+    if (savedExp) collapseEl.classList.add('show');
+    setToggleLabel(savedExp);
+
+    collapseEl.addEventListener('shown.bs.collapse',  () => { localStorage.setItem(KEY_EXP,'true');  setToggleLabel(true);  });
+    collapseEl.addEventListener('hidden.bs.collapse', () => { localStorage.setItem(KEY_EXP,'false'); setToggleLabel(false); });
+  }
+
+  /* ---- сортировка ---- */
+  const savedSort  = localStorage.getItem(KEY_SORT)  || 'matches';
+  const savedOrder = localStorage.getItem(KEY_ORDER) || 'desc';
+  sortSel.value = savedSort;
+  orderBtn.dataset.order = savedOrder;
+  orderBtn.textContent   = savedOrder === 'asc' ? '↑' : '↓';
+
+  const getVal = (el, key) => {
+    const v = parseFloat(el.dataset[key]);
+    return Number.isFinite(v) ? v : -Infinity; // пустые в конец при desc
+  };
+
+  function sortGrid() {
+    const key   = sortSel.value;
+    const order = orderBtn.dataset.order || 'desc';
+    const items = Array.from(grid.children); // .col-12 / .col-md-6 / .col-lg-4
+
+    items.sort((a, b) => {
+      const va = getVal(a, key), vb = getVal(b, key);
+      return order === 'asc' ? (va - vb) : (vb - va);
+    });
+
+    // переотрисовать порядок
+    items.forEach(el => grid.appendChild(el));
+
+    localStorage.setItem(KEY_SORT,  key);
+    localStorage.setItem(KEY_ORDER, order);
+  }
+
+  sortSel.addEventListener('change', sortGrid);
+  orderBtn.addEventListener('click', () => {
+    orderBtn.dataset.order = (orderBtn.dataset.order === 'asc') ? 'desc' : 'asc';
+    orderBtn.textContent   = orderBtn.dataset.order === 'asc' ? '↑' : '↓';
+    sortGrid();
+  });
+
+  // первичная сортировка
+  sortGrid();
+})();
+</script>
+{% endblock %}

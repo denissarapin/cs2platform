@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ tournament.name }} — Bracket{% endblock %}
+{% block body_class %}tournaments-page{% endblock %}
+
+{% block content %}
+
+  {# общий верх: hero + tabs (активна Bracket) #}
+  {% include "tournaments/_hero.html" with active_tab="bracket" %}
+
+  <section class="ov-card card-dark card-ring ov-bracket">
+    <div class="ov-card-h">Сетка</div>
+
+    <div class="brk-scroller">
+      <div class="brk">
+        {% regroup tournament.matches.all|dictsort:"round" by round as rounds %}
+        {% for round in rounds %}
+          <div class="round" data-round="{{ round.grouper }}">
+            <h6 class="round-title">
+              {% if round.grouper == 1 %}Quarter finals
+              {% elif round.grouper == 2 %}Semi finals
+              {% elif round.grouper == 3 %}Final
+              {% else %}Раунд {{ round.grouper }}{% endif %}
+            </h6>
+            {% for match in round.list %}
+              {% include "tournaments/_match.html" with match=match %}
+            {% endfor %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <style>
+  /* карточка */
+  .ov-bracket{ padding:14px; }
+
+  /* горизонтальный скролл */
+  .brk-scroller{ position:relative; overflow-x:auto; overflow-y:hidden; padding:6px 2px 10px; }
+  .brk{ display:flex; align-items:flex-start; gap:24px; }
+
+  /* раунды */
+  .round{ min-width:280px; display:flex; flex-direction:column; gap:12px; }
+  .round-title{ margin:2px 6px 6px; color:#cfe0ff; font-weight:900; }
+
+  /* матчи — стеклянные */
+  @keyframes matchFlash{0%{box-shadow:0 0 0 rgba(0,0,0,0);transform:scale(1)}25%{box-shadow:0 10px 26px rgba(2,6,23,.55);transform:scale(1.01)}100%{box-shadow:0 0 0 rgba(0,0,0,0);transform:scale(1)}}
+  .match.flash{ animation:matchFlash .8s ease-out; }
+
+  .match{
+    position:relative; width:260px; border-radius:12px;
+    background:linear-gradient(180deg, rgba(16,23,38,.80), rgba(10,16,28,.82));
+    border:1px solid rgba(148,163,184,.16);
+    box-shadow:0 10px 26px rgba(2,6,23,.35); overflow:hidden;
+    transition:transform .15s, box-shadow .15s, border-color .15s;
+    border-left:4px solid rgba(148,163,184,.35);
+  }
+  .match:hover{ transform:translateY(-1px); box-shadow:0 16px 40px rgba(2,6,23,.45); border-color:rgba(148,163,184,.24); }
+
+  .match.status-finished{  border-left-color:#22c55e; }
+  .match.status-running{   border-left-color:#f59e0b; }
+  .match.status-scheduled{ border-left-color:#6b7280; }
+  .match.status-cancelled{ border-left-color:#ef4444; }
+
+  .team{
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+    padding:10px 12px; color:#dfe7fb;
+    background:rgba(255,255,255,.04);
+    border-bottom:1px solid rgba(148,163,184,.12);
+  }
+  .team:last-child{ border-bottom:none; }
+  .team .name{ display:flex; align-items:center; gap:8px; min-width:0; }
+  .team img.logo{ width:18px; height:18px; object-fit:cover; border-radius:4px; }
+  .team .score{ font-weight:900; color:#fff; }
+  .team.winner{ background:rgba(34,197,94,.18); border-color:rgba(34,197,94,.28); color:#eafff3; }
+  .team.waiting{ color:#b8c1d9; font-style:italic; }
+
+  .match-link{
+    position:absolute; top:8px; right:8px; width:18px; height:18px;
+    display:grid; place-items:center; border-radius:6px; text-decoration:none; background:transparent;
+  }
+  .match-link:hover{ background:rgba(255,255,255,.10); box-shadow:inset 0 0 0 1px rgba(255,255,255,.14); }
+
+  @media (max-width:768px){
+    .round{ min-width:240px; }
+    .match{ width:240px; }
+  }
+  </style>
+
+  <script>
+    const tournamentId = "{{ tournament.id }}";
+    function connectWebSocket(){
+      const protocol = location.protocol === "https:" ? "wss://" : "ws://";
+      const socket = new WebSocket(
+        protocol + location.hostname + ":8000/ws/tournaments/" + tournamentId + "/bracket/"
+      );
+
+      socket.onopen = () => console.log("✅ WebSocket connected");
+
+      socket.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        if (data.type === "bracket_update") {
+          const el = document.getElementById("match-" + data.match_id);
+          if (el) {
+            el.outerHTML = data.html;
+            const upd = document.getElementById("match-" + data.match_id);
+            if (upd) { upd.classList.add("flash"); setTimeout(()=>upd.classList.remove("flash"), 900); }
+          }
+        }
+      };
+
+      socket.onclose = () => setTimeout(connectWebSocket, 3000);
+      socket.onerror = () => socket.close();
+    }
+    connectWebSocket();
+  </script>
+
+  {# модалка Join (общая) #}
+  {% include "tournaments/_join_modal.html" %}
+
+{% endblock %}

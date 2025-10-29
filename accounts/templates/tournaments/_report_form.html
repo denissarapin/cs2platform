@@ -1,0 +1,64 @@
+{# tournaments/_report_form.html #}
+<div class="modal-header border-0 pb-0">
+  <h5 class="modal-title fw-900">Ввод результата</h5>
+  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<form method="post"
+      hx-post="{% url 'tournaments:report_match' tournament.pk match.pk %}"
+      hx-target="#reportModalBody"
+      hx-swap="none">
+  {% csrf_token %}
+
+  <div class="modal-body pt-3">
+    <p class="text-muted mb-3">
+      Раунд {{ match.round }}:
+      <strong>
+        {% if match.team_a %}[{{ match.team_a.tag }}] {{ match.team_a.name }}{% else %}<em>—</em>{% endif %}
+        <span class="opacity-75">vs</span>
+        {% if match.team_b %}[{{ match.team_b.tag }}] {{ match.team_b.name }}{% else %}<em>—</em>{% endif %}
+      </strong>
+    </p>
+
+    <div class="score-row">
+      <label class="form-label m-0 me-2">Счёт</label>
+
+      <input type="number" name="score_a" min="0"
+             class="form-control score-input text-center"
+             value="{{ match.score_a|default:0 }}">
+
+      <span class="score-sep">:</span>
+
+      <input type="number" name="score_b" min="0"
+             class="form-control score-input text-center"
+             value="{{ match.score_b|default:0 }}">
+    </div>
+
+    <div class="quick-sets mt-3">
+      <button class="chip chip-glass" type="button" data-set="1-0">1–0</button>
+      <button class="chip chip-glass" type="button" data-set="0-1">0–1</button>
+      <button class="chip chip-glass" type="button" data-set="2-0">2–0</button>
+      <button class="chip chip-glass" type="button" data-set="0-2">0–2</button>
+      <button class="chip chip-glass" type="button" data-set="2-1">2–1</button>
+      <button class="chip chip-glass" type="button" data-set="1-2">1–2</button>
+    </div>
+  </div>
+
+  <div class="modal-footer border-0 pt-0">
+    <button class="btn btn-brand" type="submit">Сохранить</button>
+    <button class="btn btn-outline-light" type="button" data-bs-dismiss="modal">Отмена</button>
+  </div>
+</form>
+
+<script>
+  (function () {
+    const root = document.currentScript.closest('.modal-content');
+    root.querySelectorAll('[data-set]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const [a, b] = btn.dataset.set.split('-');
+        root.querySelector('input[name="score_a"]').value = a;
+        root.querySelector('input[name="score_b"]').value = b;
+      });
+    });
+  })();
+</script>

@@ -1,0 +1,84 @@
+{# templates/teams/my_teams.html #}
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Мои команды{% endblock %}
+{% block body_class %}teams-page{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="mb-0">Мои команды</h2>
+  <a href="{% url 'teams:team_create' %}" class="btn btn-success">Создать команду</a>
+</div>
+
+{% if memberships %}
+  <div class="team-grid">
+    {% for m in memberships %}
+      <a href="{% url 'teams:team_detail' slug=m.team.slug %}" class="team-card-link">
+        <div class="team-card">
+          <!-- LEFT + CENTER -->
+          <div class="team-main">
+            <!-- Круглый логотип / заглушка -->
+            <div class="team-logo-round">
+              {% if m.team.logo %}
+                <img src="{{ m.team.logo.url }}" alt="">
+              {% else %}
+                <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+                  <path fill="currentColor"
+                        d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-5 0-9 2.6-9 5.8A.2.2 0 0 0 3.2 20h17.6a.2.2 0 0 0 .2-.2C21 16.6 17 14 12 14Z"/>
+                </svg>
+              {% endif %}
+            </div>
+
+            <!-- Текстовая часть -->
+            <div class="team-text">
+              <div class="team-title">
+                [{{ m.team.tag }}] {{ m.team.name }}
+                {% if m.role == 'captain' %}
+                  <i class="bi bi-award-fill crown" title="Вы — капитан"></i>
+                {% endif %}
+              </div>
+
+              <div class="team-meta">
+                Игроков: {{ m.team.memberships.count }}/5 •
+                Роль: {{ m.get_role_display }} •
+                Создана: {{ m.team.created_at|date:"d.m" }}
+              </div>
+
+              <!-- Стек аватарок -->
+              <div class="member-stack mt-1">
+                <div class="m-avatars">
+                  {% for tm in m.team.memberships.all|slice:":4" %}
+                    {% if tm.user.avatar %}
+                      <img class="m-avatar" src="{{ tm.user.avatar.url }}" alt="{{ tm.user.username }}">
+                    {% else %}
+                      {# 🔹 ФОЛБЭК: заглушка #}
+                      <img class="m-avatar" src="{% static 'img/avatars/ph_user.png' %}" alt="{{ tm.user.username }}">
+                    {% endif %}
+                  {% endfor %}
+                </div>
+                {% with extra=m.team.memberships.count|add:"-4" %}
+                  {% if extra|add:0 > 0 %}
+                    <span class="m-more">+{{ extra }}</span>
+                  {% endif %}
+                {% endwith %}
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT: бейджи -->
+          <div class="d-flex align-items-center gap-2">
+            {% if m.role == 'captain' %}
+              <span class="badge-chip captain">Captain</span>
+            {% endif %}
+            {% if m.pending_invites %}
+              <span class="badge-chip invites">Инвайтов: {{ m.pending_invites }}</span>
+            {% endif %}
+          </div>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="alert alert-info">Вы ещё не состоите ни в одной команде.</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,92 @@
+{% load static %}
+
+{% if not final_map %}
+  <section class="ov-card card-dark card-ring veto-full">
+    {% if match.veto_deadline %}
+      <div class="veto-timer-overlay">
+        <div id="veto-timer"
+             class="timer-chip"
+             data-deadline="{{ match.veto_deadline|date:'U' }}000">
+          <span class="chip chip-glass">00:30</span>
+        </div>
+        {% if current_team %}
+          <div class="timer-turn text-muted">
+            Ход команды: <b>{{ current_team.name }}</b>
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <div class="veto-grid">
+      {% for code,label in map_pool %}
+        <div class="veto-card {% if code not in available_codes %}disabled{% endif %}">
+          <img src="{% static 'img/maps/' %}{{ code }}.jpg" alt="{{ label }}">
+          <div class="vc-body">
+            <div class="vc-title">{{ label }}</div>
+            {% if code in available_codes %}
+              <button type="button" class="btn btn-danger btn-sm ban-btn" data-map="{{ code }}">Забанить</button>
+            {% else %}
+              <span class="chip chip-dark">Забанена</span>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+{% else %}
+  <section class="ov-card">
+    <div class="ov-card-h">Бан/пик карт</div>
+    {% if bans %}
+      <ul class="ban-list">
+        {% for ban in bans %}
+          <li>
+            <span class="idx">{{ forloop.counter }}.</span>
+            <span class="who">[{% if ban.team.tag %}{{ ban.team.tag }}{% else %}—{% endif %}] {{ ban.team.name }}</span>
+            <span class="act">{% if ban.action == 'pick' %}выбрал{% else %}забанил{% endif %}</span>
+            <span class="map">{{ ban.get_map_name_display }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="text-muted">Действий нет.</div>
+    {% endif %}
+  </section>
+{% endif %}
+
+<style>
+  .veto-full{ padding:14px; position:relative; }
+  .veto-timer-overlay{
+    position:sticky; top:-6px; z-index:2;
+    display:flex; align-items:center; justify-content:center; gap:12px;
+    margin:-6px 0 10px 0;
+  }
+  .timer-chip{ font-size:1.1rem; }
+  .timer-turn{ color:#e6eeff; opacity:.9; }
+
+  .veto-grid{
+    display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap:12px;
+  }
+  .veto-card{
+    overflow:hidden; border-radius:14px; color:#e6eeff;
+    background:linear-gradient(180deg, rgba(16,23,38,.80), rgba(10,16,28,.82));
+    border:1px solid rgba(148,163,184,.18);
+  }
+  .veto-card img{ width:100%; height:160px; object-fit:cover; display:block; }
+  .veto-card .vc-body{ padding:10px; display:flex; justify-content:space-between; align-items:center; }
+  .veto-card .vc-title{ font-weight:900; }
+  .veto-card.disabled{ opacity:.55; }
+
+  .ban-list{ list-style:none; padding:0; margin:0; }
+  .ban-list li{
+    display:flex; gap:10px; align-items:center;
+    padding:8px 10px; color:#e6eeff;
+    background:rgba(255,255,255,.02); border:1px solid rgba(148,163,184,.12);
+    border-radius:10px;
+  }
+  .ban-list li + li{ margin-top:8px; }
+  .ban-list .idx{ opacity:.6; width:20px; text-align:right; }
+  .ban-list .who{ font-weight:800; }
+  .ban-list .act{ opacity:.75; }
+  .ban-list .map{ font-weight:900; color:#d1ffe1; }
+</style>

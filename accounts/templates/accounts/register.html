@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Регистрация{% endblock %}
+
+{# отдельный класс для этой страницы #}
+{% block body_class %}register-page{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+  /* ==== ФОН СТРАНИЦЫ ==== */
+  body.register-page:before{
+    min-height: 100vh;
+    --register-bg: url("{% static 'img/bg/login.jpg' %}"); /* замени путь при необходимости */
+    background:
+      radial-gradient(1200px 260px at 95% -40%, rgba(245,158,11,.25) 0, rgba(245,158,11,0) 65%),
+      linear-gradient(180deg, rgba(22,29,47,.20), rgba(13,20,35,.20)),
+      var(--register-bg) center/cover fixed no-repeat;
+  }
+
+  /* ==== РАСПОЛОЖЕНИЕ (чуть выше центра) ==== */
+  .register-page .auth-wrap{
+    min-height: calc(100vh - 64px);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;   /* вместо center */
+    padding-top: 6rem;         /* регулируй: 5–8rem */
+    padding-bottom: 3rem;
+  }
+
+  /* ==== КАРТОЧКА ==== */
+  .auth-card{ max-width: 720px; width: 100%; }  /* регистрации чуть шире */
+  .auth-card .card-body{ padding: 2.75rem 3rem; }
+  @media (min-width: 768px){ .auth-card .card-body{ padding: 3.25rem 3.5rem; } }
+
+  /* ==== ТИПОГРАФИКА ==== */
+  .auth-title{
+    font-weight: 800; letter-spacing:.3px; margin-bottom:.25rem;
+    background: linear-gradient(135deg,#e5e7eb 0%, #93c5fd 50%, #c4b5fd 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .auth-subtitle{ color: rgba(226,232,240,.75); margin-bottom: 1.25rem; }
+
+  /* ==== ПОЛЯ ФОРМЫ ==== */
+  .auth-card form p{ margin-bottom: 1rem; }
+  .auth-card form label{
+    display:block; margin-bottom:.35rem; font-weight:600; font-size:.95rem;
+    color: rgba(226,232,240,.9);
+  }
+  .auth-card input[type="text"],
+  .auth-card input[type="password"],
+  .auth-card input[type="email"]{
+    width:100%; height:46px;
+    color:#e5e7eb;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(148,163,184,.22);
+    border-radius: .75rem;
+    padding: .6rem .9rem;
+    transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .auth-card input:focus{
+    outline:0;
+    background: rgba(255,255,255,.08);
+    border-color: rgba(59,130,246,.6);
+    box-shadow: 0 0 0 .25rem rgba(59,130,246,.25);
+  }
+
+  /* Django helptext (правила пароля) */
+  .auth-card .helptext{
+    display:block;
+    color: rgba(226,232,240,.7);
+    font-size:.9rem;
+    margin-top:.35rem;
+  }
+  .auth-card .helptext ul{
+    margin:.5rem 0 0 1.1rem;
+  }
+  .auth-card .helptext li{
+    margin:.25rem 0;
+  }
+
+  /* Ошибки */
+  .auth-card .errorlist{
+    list-style:none; margin:0 0 .75rem; padding:.5rem .75rem;
+    border-radius:.5rem;
+    background: rgba(239,68,68,.1);
+    border: 1px solid rgba(239,68,68,.35);
+    color:#fecaca; font-size:.925rem;
+  }
+
+  /* ==== CTA-кнопка (тот же градиент, что на логине) ==== */
+  .btn-neo{
+    color:#0b1020; font-weight:700; letter-spacing:.2px;
+    border:0; border-radius: .9rem; padding:.9rem 1rem;
+    background: linear-gradient(135deg,#22d3ee 0%, #3b82f6 45%, #8b5cf6 100%);
+    background-size: 200% 200%;
+    box-shadow: 0 10px 28px rgba(59,130,246,.35), inset 0 1px 0 rgba(255,255,255,.35);
+    transition: transform .16s ease, filter .16s ease, box-shadow .16s ease, background-position .35s ease;
+  }
+  .btn-neo:hover{
+    background-position: 100% 0%;
+    transform: translateY(-1px);
+    filter: saturate(112%) contrast(104%);
+    box-shadow: 0 16px 36px rgba(59,130,246,.45);
+  }
+
+  .auth-meta{ color: rgba(226,232,240,.6); }
+  .auth-meta a{ color:#93c5fd; text-decoration:none; }
+  .auth-meta a:hover{ text-decoration:underline; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="card card-ring auth-card">
+    <div class="card-body">
+      <h1 class="auth-title text-center">Регистрация</h1>
+      <p class="auth-subtitle text-center">Создай аккаунт и присоединяйся к турнирам</p>
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        <p>
+          {{ form.username.label_tag }} 
+          {{ form.username }}
+          {% if form.username.errors %}
+            <ul class="errorlist">{{ form.username.errors }}</ul>
+          {% endif %}
+        </p>
+
+        <p>
+          {{ form.email.label_tag }} 
+          {{ form.email }}
+          {% if form.email.errors %}
+            <ul class="errorlist">{{ form.email.errors }}</ul>
+          {% endif %}
+        </p>
+
+        <p>
+          {{ form.password1.label_tag }}
+          {{ form.password1 }}
+          {% if form.password1.errors %}
+            <ul class="errorlist">{{ form.password1.errors }}</ul>
+          {% endif %}
+        </p>
+
+        <p>
+          {{ form.password2.label_tag }}
+          {{ form.password2 }}
+          {% if form.password2.errors %}
+            <ul class="errorlist">{{ form.password2.errors }}</ul>
+          {% endif %}
+        </p>
+
+        <div class="d-grid mt-3">
+          <button type="submit" class="btn btn-neo">Зарегистрироваться</button>
+        </div>
+      </form>
+
+      <p class="auth-meta text-center mt-3 mb-0">
+        Уже есть аккаунт?
+        <a href="{% url 'login' %}">Войти</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

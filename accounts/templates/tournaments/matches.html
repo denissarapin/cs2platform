@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ tournament.name }} — Matches{% endblock %}
+{% block body_class %}tournaments-page{% endblock %}
+
+{% block content %}
+
+  {# общий верх: hero + tabs (активна Matches) #}
+  {% include "tournaments/_hero.html" with active_tab="matches" %}
+
+  {# ===== НИЖЕ — СОДЕРЖИМОЕ ВКЛАДКИ MATCHES ===== #}
+<section class="ov-card card-dark card-ring ov-matches">
+  <div class="ov-card-h">Все матчи</div>
+
+  <ul class="list-group list-group-flush">
+    {% for m in matches %}
+      <li class="list-group-item d-flex align-items-center justify-content-between gap-3">
+
+        <div class="d-flex flex-column">
+          <div class="fw-800">
+            Раунд {{ m.round }} ·
+            <a href="{% url 'tournaments:match_detail' tournament.pk m.pk %}" class="text-decoration-none">
+              {% if m.team_a %}[{{ m.team_a.tag }}] {{ m.team_a.name }}{% else %}<em>—</em>{% endif %}
+              <span class="opacity-75">vs</span>
+              {% if m.team_b %}[{{ m.team_b.tag }}] {{ m.team_b.name }}{% else %}<em>—</em>{% endif %}
+            </a>
+          </div>
+          <div class="mt-1">
+            {% if m.status == 'finished' %}
+              <span class="chip chip-success">Finished</span>
+            {% elif m.status == 'running' %}
+              <span class="chip chip-warning">Ongoing</span>
+            {% elif m.status == 'scheduled' %}
+              <span class="chip chip-muted">Scheduled</span>
+            {% elif m.status == 'cancelled' %}
+              <span class="chip chip-dark">Cancelled</span>
+            {% else %}
+              <span class="chip chip-glass">{{ m.get_status_display }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+          <strong class="fs-5">{{ m.score_a }} : {{ m.score_b }}</strong>
+          {% if can_manage %}
+            <button
+              class="btn btn-sm btn-outline-light"
+              data-bs-toggle="modal"
+              data-bs-target="#reportModal"
+              hx-get="{% url 'tournaments:report_match' tournament.pk m.pk %}"
+              hx-target="#reportModal .modal-content"
+              hx-swap="innerHTML"
+            >
+              Ввести счёт
+            </button>
+          {% endif %}
+        </div>
+      </li>
+    {% empty %}
+      <li class="list-group-item text-muted">Матчей пока нет</li>
+    {% endfor %}
+  </ul>
+</section>
+
+{# модалка для ввода счёта #}
+<div class="modal fade modal-glass modal-report" id="reportModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content card-dark card-ring" id="reportModalBody">
+      <div class="p-4 text-center text-white-50">Загрузка…</div>
+    </div>
+  </div>
+</div>
+
+  <style>
+    /* Компактнее отступы у элементов списка внутри стеклянной карточки */
+    .ov-matches .list-group-item{
+      background: rgba(255,255,255,.02) !important;
+      border-color: rgba(148,163,184,.12) !important;
+      padding: 10px 12px;
+    }
+    .ov-matches .list-group-item + .list-group-item{
+      border-top-color: rgba(148,163,184,.10) !important;
+    }
+    body.tournaments-page .btn-outline-light{
+      color:#e5eefc !important;
+      border-color: rgba(148,163,184,.45) !important;
+    }
+    body.tournaments-page .btn-outline-light:hover{
+      color:#fff !important;
+      background: rgba(255,255,255,.08) !important;
+      border-color: rgba(148,163,184,.65) !important;
+    }
+  </style>
+
+<script>
+  // WS как был — без изменений
+  const tournamentId = "{{ tournament.id }}";
+  const protocol = location.protocol === "https:" ? "wss://" : "ws://";
+  const socket = new WebSocket(protocol + location.hostname + ":8000/ws/tournaments/" + tournamentId + "/matches/");
+  socket.onopen = () => console.log("✅ Matches WebSocket connected");
+  socket.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    if (data.type === "matches_update" && data.action === "bracket_generated") {
+      location.reload();
+    }
+  };
+  socket.onclose = () => console.warn("⚠️ Matches WS closed");
+
+  // ловим кастомный триггер от сервера после успешного сохранения
+  document.body.addEventListener("match-updated", () => {
+    const modalEl = document.getElementById("reportModal");
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    if (modal) modal.hide();
+    // простая стратегия: перезагрузить список
+    location.reload();
+  });
+</script>
+
+  {# модалка Join (общая для всех вкладок) #}
+  {% include "tournaments/_join_modal.html" %}
+
+{% endblock %}

@@ -1,0 +1,411 @@
+/* ====== Background for servers pages ====== */
+body.servers-page {
+  background:
+    linear-gradient(180deg, rgba(6,14,30,0.25) 0%, rgba(6,14,30,0.65) 100%),
+    url("/static/img/bg/mirage_bg.jpg") center top / cover no-repeat;
+  background-attachment: fixed;
+  color: #e5eefc;
+}
+
+body.servers-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(6,14,30,0.10); /* было .35 → стало .15 */
+  z-index: -1;
+}
+
+.mode-pill-row{
+  display:flex; gap:.5rem; overflow:auto; padding-bottom:.25rem;
+}
+.mode-chip{
+  display:inline-flex; align-items:center; gap:.5rem;
+  padding:.45rem .75rem; border-radius:999px; white-space:nowrap;
+  background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
+  color:var(--text); text-decoration:none; transition:transform .12s, background .12s, border-color .12s;
+}
+.mode-chip:hover{ transform: translateY(-1px); background: rgba(255,255,255,.09); }
+.mode-chip.active{ border-color: var(--brand); box-shadow: 0 0 0 2px rgba(14,165,233,.25) inset; }
+.mode-chip .dot{ width:.55rem; height:.55rem; border-radius:50%; display:inline-block; }
+.mode-chip .dot.brand{ background:#0ea5e9; }
+.mode-chip .dot.warn{ background:#f59e0b; }
+.mode-chip .dot.danger{ background:#ef4444; }
+.mode-chip .dot.success{ background:#22c55e; }
+.mode-chip .dot.muted{ background:#94a3b8; }
+
+/* ---------- Mode (preview) cards ---------- */
+.mode-card{
+  position:relative; border-radius:14px; overflow:hidden;
+  border:1px solid rgba(148,163,184,.18);
+  background: linear-gradient(180deg, var(--glass-1), var(--glass-2));
+}
+.mode-card-bg{
+  position:absolute; inset:0;
+  background-size:cover; background-position:center;
+  filter: blur(1.5px) brightness(.8);
+  transform: scale(1.05);
+}
+.mode-card::after{
+  content:""; position:absolute; inset:0;
+  background: radial-gradient(80% 60% at 50% 0, rgba(14,165,233,.12), transparent 60%);
+}
+.mode-card-body{
+  position:relative; padding:1.1rem;
+}
+.mode-card-title{ font-weight:700; font-size:1.05rem; }
+
+/* ---------- Server list cards (mode page) ---------- */
+.server-card{
+  position:relative; display:flex; gap:1rem; align-items:center;
+  padding:.75rem .75rem; border-radius:12px;
+  border:1px solid rgba(148,163,184,.18);
+  background: linear-gradient(180deg, var(--glass-1), var(--glass-2));
+}
+.server-thumb{
+  width:280px; height:110px; border-radius:10px; flex:0 0 auto;
+  background-size:cover; background-position:center;
+  filter: blur(0.6px) brightness(.92);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
+}
+@media (max-width: 768px){ .server-thumb{ width:180px; height:100px; } }
+
+.server-main{ flex:1; min-width:0; }
+.map-pill{
+  padding:.2rem .5rem; border-radius:999px;
+  background: rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);
+  font-size:.8rem; color:var(--text);
+}
+
+.server-actions{
+  display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; justify-content:flex-end;
+}
+.ip-box{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  padding:.35rem .5rem; border-radius:8px;
+  background: rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.14);
+  color:var(--text);
+}
+.btn-copy{
+  color:#fff; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.28);
+}
+.btn-copy:hover{ background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.42); }
+
+/* общий чип/бэйдж, подкраска берётся от .brand/.warn/... */
+.badge-chip{
+  display:inline-flex; align-items:center; gap:.35rem;
+  padding:.2rem .55rem; border-radius:999px; font-weight:600; font-size:.8rem;
+  background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.16); color:var(--text);
+}
+.badge-chip.brand{ box-shadow: 0 0 0 1px rgba(14,165,233,.45) inset; }
+.badge-chip.warn{  box-shadow: 0 0 0 1px rgba(245,158,11,.45) inset; }
+.badge-chip.danger{box-shadow: 0 0 0 1px rgba(239,68,68,.45) inset; }
+.badge-chip.success{box-shadow: 0 0 0 1px rgba(34,197,94,.45) inset; }
+.badge-chip.muted{ box-shadow: 0 0 0 1px rgba(148,163,184,.45) inset; }
+/* === Серверы: грид вертикальных карточек === */
+.srv-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; }
+  @media (max-width: 1200px){ .srv-grid{ grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px){  .srv-grid{ grid-template-columns: 1fr; } }
+
+/* карточка-сервер */
+.srv-tile{
+  position:relative; height:100px;       /* компактная карточка */
+  border-radius:16px; overflow:hidden;
+  border:1px solid rgba(148,163,184,.16);
+  background:#0b1220;
+  box-shadow:0 10px 26px rgba(2,6,23,.35);
+  transition:box-shadow .18s ease, border-color .18s ease;
+  text-decoration:none;
+}
+.srv-meter {
+  --segments: 20;
+  --gap: 2px;
+  position: absolute;
+  left: 10px;
+  top: 14px;
+  bottom: 14px;
+  width: 6px; /* чуть уже чем раньше */
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .10);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.10);
+  overflow: hidden;
+  color: #22c55e;
+}
+
+/* деления */
+.srv-meter::before {
+  display: none !important;
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.45;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0 calc(100%/var(--segments) - var(--gap)),
+    rgba(255, 255, 255, 0.18) calc(100%/var(--segments) - var(--gap)) calc(100%/var(--segments))
+  );
+}
+
+/* заполнение */
+.srv-meter-fill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: currentColor;
+  border-radius: 8px 8px 0 0;
+  height: 0%;
+  transition: height 0.4s ease;
+  -webkit-mask: none !important;     /* убираем сегментную маску */
+  mask: none !important;
+}
+
+/* Цвета шкалы */
+.srv-meter.meter-green  { color: #22c55e; }  /* <30% */
+.srv-meter.meter-yellow { color: #facc15; }  /* 30–70% */
+.srv-meter.meter-red    { color: #ef4444; }  /* >70% */
+
+/* Отступ текста от шкалы */
+.srv-tile .srv-topline,
+.srv-tile .srv-bottomline {
+  left: 26px !important;
+}
+/* (опционально) старый кружок-индикатор можно удалить */
+.meter-dot{ display:none; }
+/* фон на всю карточку — без блюра */
+.srv-bg{ position:absolute; inset:0; background-size:cover; background-position:center; }
+.srv-overlay{ position:absolute; inset:0; background:rgba(8,14,30,.72); pointer-events:none; }
+.srv-topline{
+  position:absolute; left:12px; right:60px; top:18px;   /* справа место под кнопки */
+  display:flex; align-items:center; gap:.6rem;
+}
+.srv-topstat{
+  display:inline-flex; align-items:center; gap:.35rem;
+  color:rgba(226,232,255,.9); font-weight:700; font-size:.9rem;
+}
+.srv-topstat i{ font-size:.95rem; opacity:.9; }
+
+.srv-title{
+  margin:0; color:#fff; text-transform:uppercase;
+  font-weight:900; letter-spacing:.04em; font-size:1.05rem;   /* жирный заголовок */
+  text-shadow:0 2px 8px rgba(0,0,0,.35);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+/* BOTTOM LINE: индикатор игроков + players/capacity | map */
+.srv-bottomline{
+  position:absolute; left:12px; right:60px; bottom:18px;
+  display:flex; align-items:center; gap:.55rem; flex-wrap:wrap;
+  color:rgba(226,232,255,.92); font-size:.9rem; font-weight:700;
+}
+:root{
+  --srv-meter-w: 6px;      /* ширина шкалы (было ~8px) */
+  --srv-meter-left: 10px;  /* отступ слева от края карточки */
+  --srv-meter-top: 55px;   /* отступ сверху (чем больше — тем ниже и короче) */
+  --srv-meter-bot: 16px;   /* отступ снизу */
+  --srv-meter-gap: 6px;    /* зазор между шкалой и текстом */
+}
+
+/* сама шкала */
+.srv-meter{
+  left: var(--srv-meter-left) !important;
+  top: var(--srv-meter-top) !important;
+  bottom: var(--srv-meter-bot) !important;
+  width: var(--srv-meter-w) !important;
+  border-radius: calc(var(--srv-meter-w) + 4px) !important;
+}
+
+/* чтобы текст не наезжал на шкалу */
+.srv-tile .srv-topline,
+.srv-tile .srv-bottomline{
+  left: calc(var(--srv-meter-left) + var(--srv-meter-w) + var(--srv-meter-gap)) !important;
+}
+.meter-dot{
+  width:7px; height:22px; border-radius:4px;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.10);
+  background:#16a34a;          /* дефолт — зелёный, перекрасим классами ниже */
+}
+.meter-green{  background:#16a34a; }   /* ≤8  */
+.meter-orange{ background:#f59e0b; }   /* 9–12 */
+.meter-red{    background:#ef4444; }   /* >12 */
+.meta-sep{ opacity:.6; }
+
+/* RIGHT ACTIONS: круглые ghost-кнопки столбиком */
+.srv-actions{
+  position:absolute; right:12px; top:50%; display:flex; flex-direction:column; gap:8px;transform: translateY(-50%);
+}
+.srv-actions .btn-ghost{
+  width:36px; height:36px; border-radius:999px;
+  display:inline-flex; align-items:center; justify-content:center;
+  color:#fff; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.28);
+  transition:background .15s, border-color .15s, box-shadow .15s;
+}
+.srv-actions .btn-ghost:hover{ background:rgba(255,255,255,.10); border-color:rgba(255,255,255,.42); }
+.srv-actions .btn-ghost i{ font-size:1.05rem; }
+.mode-rail,
+.mode-pill-row{
+  display:flex;
+  gap:8px;
+  overflow:auto;
+  padding-bottom:6px;
+  scrollbar-width: thin;
+}
+.mode-rail::-webkit-scrollbar,
+.mode-pill-row::-webkit-scrollbar{ height:6px; }
+.mode-rail::-webkit-scrollbar-thumb,
+.mode-pill-row::-webkit-scrollbar-thumb{
+  background: rgba(148,163,184,.28); border-radius:6px;
+}
+
+/* размер + форма */
+.mode-rail .mode-chip,
+.mode-pill-row .mode-chip{
+  min-width:auto;
+  height:34px;
+  padding:0 14px;
+  border-radius:10px;             /* более квадратные */
+  display:inline-flex; align-items:center; justify-content:center;
+  white-space:nowrap;
+
+  background: rgba(15,23,42,.66);
+  border:1px solid rgba(148,163,184,.18);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+
+  color:#e5eefc; text-decoration:none;
+  font-size:.8rem; font-weight:700; letter-spacing:.02em;
+  text-transform: uppercase;
+
+  transition: background .12s, border-color .12s, box-shadow .12s;
+}
+
+/* без фоновых картинок/скримов внутри чипа */
+.mode-rail .mode-chip .chip-bg,
+.mode-rail .mode-chip .chip-scrim,
+.mode-pill-row .mode-chip .chip-bg,
+.mode-pill-row .mode-chip .chip-scrim{ display:none; }
+
+.mode-rail .mode-chip:hover,
+.mode-pill-row .mode-chip:hover{
+  transform:none;
+  background: rgba(30,41,59,.8);
+  border-color: rgba(148,163,184,.26);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+}
+.mode-rail .mode-chip.active,
+.mode-pill-row .mode-chip.active{
+  background: rgba(2,132,199,.18);
+  border-color: rgba(2,132,199,.35);
+  box-shadow: inset 0 0 0 2px rgba(14,165,233,.25);
+  color:#fff;
+}
+.mode-rail .mode-chip .chip-title,
+.mode-pill-row .mode-chip .chip-title{ font-size:inherit; font-weight:700; }
+
+/* цветные точки (используются в навигации mode.html) */
+.mode-chip .dot{ width:6px; height:6px; border-radius:50%; display:inline-block; }
+.mode-chip .dot.brand{ background:#0ea5e9; }
+.mode-chip .dot.warn{ background:#f59e0b; }
+.mode-chip .dot.danger{ background:#ef4444; }
+.mode-chip .dot.success{ background:#22c55e; }
+.mode-chip .dot.muted{ background:#94a3b8; }
+
+/* =========================
+  Карточки режимов (server_list.html)
+  ========================= */
+.mode-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 16px;
+}
+.mode-tile{
+  position: relative;
+  display:block;
+  height: 320px;                  /* при желании сделай 240px для более компактного вида */
+  border-radius: 16px;
+  overflow: hidden;
+  background: #0b1220;
+  border: 1px solid rgba(148,163,184,.16);
+  box-shadow: 0 10px 28px rgba(2,6,23,.35);
+  transition: box-shadow .18s ease, border-color .18s ease;
+  text-decoration: none;
+}
+.mode-tile:hover{
+  box-shadow: 0 16px 40px rgba(2,6,23,.5);
+  border-color: rgba(148,163,184,.28);
+}
+.mode-bg{
+  position:absolute; inset:0;
+  background-size: cover; background-position: center;
+  filter: saturate(105%) brightness(.92);
+  transform: scale(1.02);                /* базовый scale */
+  transition: transform .25s ease;
+}
+/* без зума на ховере (статично) */
+.mode-tile:hover .mode-bg{ transform: scale(1.02); }
+
+.mode-scrim{
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  background: rgba(8,14,30,.55);         /* равномерное затемнение */
+  pointer-events: none;
+}
+.mode-caption{
+  position:absolute; left:0; right:0; bottom:16px;
+  text-align:center; padding: 0 10px;
+}
+.mode-name{
+  font-weight: 800; font-size: 1.05rem; letter-spacing: .3px;
+  color:#fff; text-shadow: 0 2px 8px rgba(0,0,0,.35);
+}
+.mode-sub{
+  margin-top:2px; font-size:.9rem; color: rgba(229,238,252,.85);
+}
+
+/* =========================
+  Карточки серверов (mode.html)
+  ========================= */
+.server-card{
+  position:relative; display:flex; gap:1rem; align-items:center;
+  padding:.9rem; border-radius:14px;
+  border:1px solid rgba(148,163,184,.18);
+  background: linear-gradient(180deg, var(--glass-1), var(--glass-2));
+  min-height:132px;                               /* выше и объемнее */
+  transition: box-shadow .18s ease, border-color .18s ease;
+}
+.server-card:hover{
+  border-color: rgba(148,163,184,.28);
+  box-shadow: 0 12px 30px rgba(2,6,23,.38);
+}
+
+.server-thumb{
+  width:360px; height:132px;                      /* больше превью */
+  border-radius:12px; flex:0 0 auto;
+  background-size:cover; background-position:center;
+  filter: brightness(.95);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+}
+@media (max-width: 1200px){ .server-thumb{ width:300px; height:120px; } }
+@media (max-width: 768px){  .server-thumb{ width:200px; height:100px; } }
+
+.server-main{ flex:1; min-width:0; }
+.server-main .badge-chip{ font-size:.78rem; padding:.22rem .6rem; border-radius:999px; }
+.map-pill{ padding:.22rem .6rem; border-radius:999px; font-size:.78rem; }
+
+.server-actions{
+  margin-left:auto; display:flex; gap:.6rem; align-items:center; flex-wrap:wrap; justify-content:flex-end;
+}
+.ip-box{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size:.9rem;
+  padding:.45rem .65rem;
+  border-radius:10px;
+  background: rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.14);
+  color:var(--text);
+}
+.btn-copy{
+  padding:.45rem .7rem; border-radius:10px; font-weight:700;
+  color:#fff; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.28);
+}
+.btn-copy:hover{ background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.42); }

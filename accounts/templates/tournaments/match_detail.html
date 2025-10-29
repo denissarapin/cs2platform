@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Матч — {{ tournament.name }}{% endblock %}
+{% block body_class %}tournaments-page{% endblock %}
+
+{% block content %}
+
+  <div class="match-hero card-dark card-ring">
+    <div class="mh-top">
+        <button id="veto-btn"
+                class="chip chip-glass mh-veto-btn {% if not final_map and match.veto_state != 'done' %}d-none{% endif %}"
+                data-bs-toggle="modal"
+                data-bs-target="#vetoModal">
+        Veto
+        </button>
+      <div class="mh-actions">
+        <a href="{% url 'tournaments:bracket' tournament.pk %}" class="btn btn-outline-light btn-sm">← Back to bracket</a>
+        <a href="{% url 'tournaments:matches' tournament.pk %}" class="btn btn-outline-light btn-sm">All matches</a>
+        {% if can_manage %}
+            <button
+            class="btn btn-sm btn-outline-light"
+            data-bs-toggle="modal"
+            data-bs-target="#reportModal"
+            hx-get="{% url 'tournaments:report_match' tournament.pk match.pk %}"
+            hx-target="#reportModal .modal-content"
+            hx-swap="innerHTML"
+            >
+            Ввести счёт
+            </button>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="mh-wrap">
+      <!-- LEFT -->
+      <div class="mh-side">
+        {% if match.team_a and match.team_a.logo %}
+          <img class="mh-logo" src="{{ match.team_a.logo.url }}" alt="{{ match.team_a.name }}">
+        {% else %}
+          <div class="mh-logo mh-ph"><i class="bi bi-people-fill"></i></div>
+        {% endif %}
+
+        <div class="mh-team">
+          <div class="mh-tag">[{% if match.team_a %}{{ match.team_a.tag }}{% else %}?{% endif %}]</div>
+          <div class="mh-name">{% if match.team_a %}{{ match.team_a.name }}{% else %}—{% endif %}</div>
+
+          {% if match.status == "finished" %}
+            <span class="chip chip-dark {% if match.winner_id and match.winner_id != match.team_a_id %}chip-danger{% endif %}">
+              {% if match.winner_id and match.winner_id == match.team_a_id %}Victory{% else %}Defeat{% endif %}
+            </span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- CENTER -->
+      <div class="mh-center">
+        <div class="mh-score">
+          <span>{{ match.score_a|default:0 }}</span>
+          <span class="mh-colon">:</span>
+          <span>{{ match.score_b|default:0 }}</span>
+        </div>
+        <div class="mh-state chip chip-glass">{{ match.get_status_display|default:"—" }}</div>
+        <div class="mh-sub">Match #{{ match.id }} · Round {{ match.round }}</div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="mh-side mh-side--right">
+        {% if match.team_b and match.team_b.logo %}
+          <img class="mh-logo" src="{{ match.team_b.logo.url }}" alt="{{ match.team_b.name }}">
+        {% else %}
+          <div class="mh-logo mh-ph"><i class="bi bi-people-fill"></i></div>
+        {% endif %}
+
+        <div class="mh-team mh-team--right">
+          <div class="mh-tag">[{% if match.team_b %}{{ match.team_b.tag }}{% else %}?{% endif %}]</div>
+          <div class="mh-name">{% if match.team_b %}{{ match.team_b.name }}{% else %}—{% endif %}</div>
+
+          {% if match.status == "finished" %}
+            <span class="chip chip-dark {% if match.winner_id and match.winner_id == match.team_b_id %}chip-success{% endif %}">
+              {% if match.winner_id and match.winner_id == match.team_b_id %}Victory{% else %}Defeat{% endif %}
+            </span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="match-container">
+    {% include "tournaments/match_detail_inner.html" %}
+  </div>
+<div class="modal fade" id="vetoModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content card-dark card-ring">
+      <div class="modal-header">
+        <h5 class="modal-title">Veto</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div id="veto-modal-body" class="modal-body p-0">
+        {% include "tournaments/_veto_panel.html" %}
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade modal-glass modal-report" id="reportModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content card-dark card-ring" id="reportModalBody">
+      <div class="p-4 text-center text-white-50">Загрузка…</div>
+    </div>
+  </div>
+</div>
+  <style>
+    .match-hero { padding:14px 16px 18px; }
+    .mh-top { display:flex; justify-content:flex-end; margin-bottom:10px; }
+    .mh-actions { display:flex; gap:8px; flex-wrap:wrap; }
+
+    .mh-wrap { display:grid; grid-template-columns: 1fr auto 1fr; align-items:center; gap:18px; }
+    .mh-side { display:flex; align-items:center; gap:12px; }
+    .mh-side--right { justify-content:flex-end; }
+
+    .mh-logo {
+      width:72px; height:72px; border-radius:20px; object-fit:cover;
+      box-shadow:0 10px 28px rgba(2,6,23,.45);
+      border:1px solid rgba(148,163,184,.18);
+    }
+    .mh-logo.mh-ph {
+      display:grid; place-items:center;
+      background:linear-gradient(180deg, rgba(16,23,38,.9), rgba(10,16,28,.9));
+      color:#e6eeff;
+    }
+    .mh-logo.mh-ph i { font-size:36px; opacity:.85; }
+
+    .mh-team { color:#e6eeff; }
+    .mh-team--right { text-align:right; }
+    .mh-tag { opacity:.75; font-weight:700; letter-spacing:.4px; }
+    .mh-name { font-size:1.15rem; font-weight:900; }
+
+    .mh-center { text-align:center; color:#e6eeff; }
+    .mh-score { font-size:40px; font-weight:900; letter-spacing:1px; line-height:1; }
+    .mh-colon { opacity:.85; padding:0 10px; }
+    .mh-state { display:inline-block; margin-top:6px; }
+    .mh-sub { margin-top:4px; opacity:.7; font-size:.9rem; }
+
+    .match-hero .btn-outline-light {
+      color:#e6eeff !important;
+      border-color:rgba(255,255,255,.45) !important;
+    }
+    .match-hero .btn-outline-light:hover { background:rgba(255,255,255,.12) !important; }
+    .match-hero .btn-brand { color:#0b1324 !important; }
+    .mh-top{ position:relative; } /* чтобы позиционировать кнопку */
+    .mh-veto-btn{
+    position:absolute; left:50%; transform:translateX(-50%);
+    top:-6px; z-index:3;
+    }
+  </style>
+<script>
+  const tournamentId = "{{ tournament.id }}";
+  const matchId = "{{ match.id }}";
+  let socket = null;
+
+  // -------- таймер (читает дедлайн из #veto-timer[data-deadline]) ----------
+  function updateTimer() {
+    const el = document.getElementById("veto-timer");
+    if (!el) return;
+
+    const raw = el.dataset.deadline; // миллисекунды эпохи
+    if (!raw || raw === "null") return;
+
+    const leftSec = Math.max(0, Math.floor((Number(raw) - Date.now()) / 1000));
+    const mm = String(Math.floor(leftSec / 60)).padStart(2, "0");
+    const ss = String(leftSec % 60).padStart(2, "0");
+
+    const badge = el.querySelector(".chip") || el;
+    const nextText = `${mm}:${ss}`;
+    if (badge.textContent !== nextText) badge.textContent = nextText;
+  }
+
+  // -------- поддержка авто-бана на сервере ----------
+  function heartbeat() {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify({ type: "heartbeat" }));
+    }
+  }
+
+  // -------- WS ----------
+function connectWebSocket() {
+    const protocol = location.protocol === "https:" ? "wss://" : "ws://";
+    socket = new WebSocket(
+      protocol + location.hostname + ":8000/ws/tournaments/" + tournamentId + "/matches/" + matchId + "/"
+    );
+
+    socket.onmessage = (e) => {
+      const data = JSON.parse(e.data);
+      if (data.type !== "match_update") return;
+
+      // 1) основной блок под счётом
+      const mainBox = document.getElementById("match-container");
+      if (mainBox && data.html != null) {
+        mainBox.innerHTML = data.html;
+      }
+
+      // 2) содержимое модалки Veto (если пришло)
+      if ("veto_html" in data) {
+        // поддержим оба варианта id (на случай разночтений)
+        const vetoBox =
+          document.getElementById("vetoModalBody") ||
+          document.getElementById("veto-modal-body");
+        if (vetoBox) vetoBox.innerHTML = data.veto_html || "";
+      }
+
+      // 3) показать/скрыть кнопку "Veto" без перезагрузки страницы
+        if ("show_veto_btn" in data) {
+        const btn = document.getElementById("veto-btn");   // <-- правильный id
+        if (btn) btn.classList.toggle("d-none", !data.show_veto_btn);
+        }
+
+      // после любой подстановки перерисуем таймер (элемент мог замениться)
+      updateTimer();
+    };
+
+    socket.onclose = () => setTimeout(connectWebSocket, 3000);
+    socket.onerror = () => { try { socket.close(); } catch (_) {} };
+  }
+
+  // -------- делегирование кликов (работает и в модалке) ----------
+  document.addEventListener("click", (e) => {
+    // Бан карты
+    const banBtn = e.target.closest(".ban-btn");
+    if (banBtn) {
+      e.preventDefault();
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({ type: "ban_map", map_name: banBtn.dataset.map }));
+      }
+      return;
+    }
+
+    // Копирование connect-строки (на всякий случай дублируем и тут)
+    const copyBtn = e.target.closest("#copySrv");
+    if (copyBtn) {
+      const cmdEl = document.getElementById("srv-cmd");
+      const cmd = cmdEl ? cmdEl.textContent.trim() : "";
+      if (cmd && navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(cmd);
+      }
+      return;
+    }
+  });
+
+  // При открытии модалки сразу пересчитаем таймер (если он есть внутри)
+  document.addEventListener("shown.bs.modal", (ev) => {
+    if (ev.target && ev.target.id === "vetoModal") {
+      updateTimer();
+    }
+  });
+    document.body.addEventListener("match-updated", () => {
+    const modalEl = document.getElementById("reportModal");
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    if (modal) modal.hide();
+    // простая стратегия: перезагрузить список
+    location.reload();
+  });
+  // -------- старт --------
+  connectWebSocket();
+  updateTimer();
+  setInterval(() => {
+    heartbeat();   // сервер применит auto-ban при истечении дедлайна
+    updateTimer(); // локальный обратный отсчёт
+  }, 1000);
+</script>
+
+{% endblock %}

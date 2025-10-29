@@ -1,0 +1,103 @@
+{# templates/home.html #}
+{% extends "base.html" %}
+{% load static %}
+{% block title %}CS2 Platform — Играй. Собирай команду. Побеждай.{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/pages/home.css' %}">
+
+<section class="home-hero mb-4">
+  <div class="home-hero__inner">
+    <h1 class="hero-title">Играй. Собирай команду. Побеждай.</h1>
+    <p class="hero-sub">Организуй команду, подключай Faceit/Steam, вступай в турниры — всё в одном месте, без лишний забот.</p>
+
+    <div class="hero-cta d-flex flex-wrap justify-content-center gap-2">
+      <a href="{% url 'teams:team_create' %}" class="btn btn-soft-primary">Создать команду</a>
+      <a href="{% url 'tournaments:list' %}" class="btn btn-ghost">Найти турнир</a>
+      <a href="{% url 'servers:home' %}" class="btn btn-ghost">Тренироваться на наших серверах</a>
+    </div>
+  </div>
+</section>
+
+{# ===== Три карточки-фичи ===== #}
+<section class="mb-4">
+  <div class="grid-3">
+    <div class="feature-card">
+      <div class="d-flex align-items-center mb-2">
+        <div class="feature-icon"><i class="bi bi-person-plus"></i></div>
+        <h5 class="feature-title m-0">Простые инвайты в команду</h5>
+      </div>
+      <p class="feature-text">
+        Приглашай игроков прямо со страницы команды. Получатель увидит уведомление в шапке и сможет принять в один клик.
+      </p>
+    </div>
+
+    <div class="feature-card">
+      <div class="d-flex align-items-center mb-2">
+        <div class="feature-icon"><i class="bi bi-trophy-fill"></i></div>
+        <h5 class="feature-title m-0">Турниры в 1 клик</h5>
+      </div>
+      <p class="feature-text">
+        Автоматическая сетка, подсчёт результатов, уведомления и демки. Создай турнир или вступи — без сложных настроек.
+      </p>
+    </div>
+
+    <div class="feature-card">
+      <div class="d-flex align-items-center mb-2">
+        <div class="feature-icon"><i class="bi bi-plug"></i></div>
+        <h5 class="feature-title m-0">Профиль & синхронизация</h5>
+      </div>
+      <p class="feature-text">
+        Привяжи Faceit и Steam, подтяни аватарки и статистику по картам. Мы покажем KPI и историю матчей на одной панели.
+      </p>
+    </div>
+  </div>
+</section>
+
+{# ===== Очень скоро ===== #}
+{# ===== Очень скоро ===== #}
+<section class="mb-4">
+  <div class="card card-dark card-ring">
+    <div class="card-body">
+      <h5 class="mb-2">Очень скоро</h5>
+      <div class="d-flex flex-wrap">
+        <span class="soon-pill"><i class="bi bi-broadcast"></i> Стрим-виджеты</span>
+        <span class="soon-pill"><i class="bi bi-graph-up-arrow"></i> Рейтинг платформы</span>
+        <span class="soon-pill"><i class="bi bi-shield-check"></i> Анти-чит отчёты</span>
+        <span class="soon-pill"><i class="bi bi-phone"></i> Мобильное приложение</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# ===== Игроки платформы (легенды) ===== #}
+<section class="mb-2">
+  <div class="legends-grid">
+    <article class="legend-card">
+      <img class="legend-avatar" src="{% static 'img/avatars/s1mple.jpg' %}" alt="s1mple">
+      <div class="legend-body">
+        <div class="legend-name">
+          s1mple <span class="legend-verified">✓</span>
+        </div>
+        <div class="legend-meta">Победитель ежемесячного кубка • 3 MVP за турнир</div>
+      </div>
+    </article>
+
+    <article class="legend-card">
+      <img class="legend-avatar" src="{% static 'img/avatars/zywoo.jpg' %}" alt="ZyWoo">
+      <div class="legend-body">
+        <div class="legend-name">ZyWoo</div>
+        <div class="legend-meta">Идеальный винстрик 12-0 • Лучший рейтинг на Mirage</div>
+      </div>
+    </article>
+  </div>
+</section>
+<section class="home-strap">
+  <div class="strap-title">CS2 Platform — твоя арена для побед.</div>
+  <div class="strap-sub">
+    Собирай состав, играй турниры, подключай серверы и расти в рейтинге — всё в одном месте.
+  </div>
+</section>
+
+{% endblock %}

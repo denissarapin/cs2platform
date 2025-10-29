@@ -1,0 +1,34 @@
+{% load humanize %}
+
+{# Заголовок #}
+<div class="notif-head d-flex align-items-center justify-content-between px-3 py-2">
+  <div class="fw-semibold">Уведомления</div>
+</div>
+
+{% if pending %}
+  <ul class="list-group list-group-flush">
+    {% for inv in pending %}
+      <li class="list-group-item bg-transparent text-white border-secondary">
+        <div class="d-flex align-items-start gap-3">
+          <div class="flex-grow-1">
+            <div class="fw-semibold">
+              Приглашение в команду [{{ inv.team.tag }}] {{ inv.team.name }}
+            </div>
+            <div class="small text-white-50">
+              от {{ inv.invited_by.username }} · {{ inv.created_at|naturaltime }}
+            </div>
+          </div>
+          <div class="d-flex gap-2">
+            <a href="{% url 'teams:accept_invite' inv.code %}" class="btn btn-success btn-sm">Принять</a>
+            <a href="{% url 'teams:decline_invite' inv.code %}" class="btn btn-outline-light btn-sm">Отклонить</a>
+          </div>
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <div class="p-3 text-white-50">Новых уведомлений нет.</div>
+{% endif %}
+
+{# OOB-обновление бейджа на колоколе #}
+{% include "teams/_notif_count.html" with pending_count=pending|length oob=True %}

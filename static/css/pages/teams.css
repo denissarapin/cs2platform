@@ -1,0 +1,238 @@
+body.teams-page {
+  background:
+    linear-gradient(180deg, rgba(6,14,30,0.25) 0%, rgba(6,14,30,0.25) 100%),
+    url("/static/img/bg/teams_bg.jpg") center top / cover no-repeat;
+  background-attachment: fixed;
+  color: #e5eefc;
+}
+
+/* Лёгкая виньетка — затемнение по бокам */
+body.teams-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(6,14,30,0) 40%, rgba(6,14,30,0.55) 100%);
+  z-index: -1;
+}
+
+/* Опционально: мягкое свечение по низу */
+body.teams-page::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(to top, rgba(10, 25, 50, 0.5) 0%, rgba(10, 25, 50, 0) 70%);
+  z-index: -1;
+}
+
+.team-logo-img { width: 64px; height: 64px; object-fit: cover; border-radius: 12px; border: 1px solid rgba(255,255,255,.08); }
+.team-logo-ph { width:64px; height:64px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+    color:#9db4d1; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,.08); }
+
+.team-card-list .member-item{ background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 12px; padding: .65rem .75rem; }
+
+.form-control-dark{ color:#e5eefc; background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.18); }
+.form-control-dark:focus{
+    color:#fff; background: rgba(255,255,255,.08); border-color: rgba(14,165,233,.45); box-shadow: 0 0 0 0.2rem rgba(14,165,233,.25);
+}
+.col-md-4 { overflow: visible; }               /* на всякий */
+  .invite-card{
+    position: relative;                          /* создаём свой контекст */
+    z-index: 100;                                /* выше соседних карточек */
+    overflow: visible;                           /* не обрезаем меню */
+  }
+  .invite-card .card-body{ overflow: visible; }  /* на случай, если body резал */
+
+  /* Само меню автоподсказок */
+  .autosuggest-menu{
+    position: absolute;
+    inset: auto 0 auto 0;
+    margin-top: .25rem;
+
+    /* z-index работает ТОЛЬКО внутри контекста .invite-card,
+      поэтому именно .invite-card мы подняли z-index:100 */
+    z-index: 9999;
+
+    background: linear-gradient(180deg, rgba(18,25,41,.97), rgba(12,18,32,.95));
+    color: var(--text);
+    border: 1px solid rgba(148,163,184,.30);
+    border-radius: 12px;
+    backdrop-filter: blur(10px) saturate(120%);
+    -webkit-backdrop-filter: blur(10px) saturate(120%);
+    box-shadow: 0 18px 48px rgba(2,6,23,.66), inset 0 1px 0 rgba(255,255,255,.05);
+    max-height: 320px;
+    overflow: auto;
+  }
+
+  /* Пункты без «беления» при hover/focus */
+  .autosuggest-menu .dropdown-item{
+    background: transparent !important;
+    color: var(--text);
+    border-bottom: 1px solid rgba(255,255,255,.10);
+    padding: .55rem .75rem;
+  }
+  .autosuggest-menu .dropdown-item:hover,
+  .autosuggest-menu .dropdown-item:focus,
+  .autosuggest-menu .dropdown-item:active,
+  .autosuggest-menu .dropdown-item.active{
+    background: transparent !important;
+    color: var(--text) !important;
+  }
+  .autosuggest-menu .btn,
+  .autosuggest-menu .btn-outline-light{
+    color: #fff !important;                                    /* белый текст всегда */
+    background: transparent !important;                        /* без белого фона */
+    border-color: rgba(255,255,255,.45) !important;
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+  }
+
+  .autosuggest-menu .btn:hover,
+  .autosuggest-menu .btn-outline-light:hover{
+    color: #fff !important;
+    background: rgba(255,255,255,.12) !important;              /* чуть светлее, но не белый */
+    border-color: rgba(255,255,255,.60) !important;
+  }
+
+  .autosuggest-menu .btn:active,
+  .autosuggest-menu .btn-outline-light:active{
+    color: #fff !important;
+    background: rgba(255,255,255,.18) !important;              /* ещё на полтона светлее */
+    border-color: rgba(255,255,255,.70) !important;
+  }
+
+  .autosuggest-menu .btn:focus-visible{
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(14,165,233,.35);
+  }
+  #outgoingInvites .btn-outline-light{
+    color:#fff !important;
+    background: rgba(255,255,255,.06);
+    border-color: rgba(255,255,255,.35);
+    box-shadow: none;
+  }
+
+  #outgoingInvites .btn-outline-light:hover,
+  #outgoingInvites .btn-outline-light:focus{
+    background: rgba(255,255,255,.12);
+    border-color: rgba(255,255,255,.45);
+    color:#fff !important;
+  }
+  .btn-kebab{
+    color: var(--text);
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.25);
+    padding: .25rem .5rem;
+    border-radius: 10px;
+  }
+  .btn-kebab:hover{
+    background: rgba(255,255,255,.10);
+    border-color: rgba(255,255,255,.35);
+  }
+
+  /* Тёмное стеклянное меню (выпадашка) */
+  .glass-menu{
+    min-width: 220px;
+    background: linear-gradient(180deg, var(--glass-1), var(--glass-2));
+    color: var(--text);
+    border: 1px solid rgba(148,163,184,.22);
+    border-radius: 12px;
+    backdrop-filter: blur(10px) saturate(120%);
+    -webkit-backdrop-filter: blur(10px) saturate(120%);
+    box-shadow: 0 16px 40px rgba(2,6,23,.55), inset 0 1px 0 rgba(255,255,255,.06);
+    z-index: 3000; /* поверх карточек */
+    overflow: hidden;
+  }
+  .glass-menu .dropdown-item{
+    color: var(--text);
+    background: transparent !important;
+    padding: .55rem .9rem;
+  }
+  .glass-menu .dropdown-item:hover,
+  .glass-menu .dropdown-item:focus{
+    background: rgba(255,255,255,.06) !important;
+    color: var(--text) !important;
+  }
+  .glass-menu .dropdown-divider{
+    border-color: rgba(255,255,255,.10);
+  }
+
+  /* На всякий: элемент строки участника не должен скрывать меню */
+  .member-item{ position: relative; }
+  .team-grid{
+    display:grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 14px;
+  }
+  @media (max-width: 992px){
+    .team-grid{ grid-template-columns: 1fr; }
+  }
+
+  /* ====== CARD ====== */
+  .team-card-link{ text-decoration:none !important; }
+  .team-card{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:.9rem 1rem; border-radius:14px;
+    background: linear-gradient(180deg, var(--glass-1), var(--glass-2));
+    border: 1px solid rgba(148,163,184,.14);
+    box-shadow: 0 10px 28px rgba(2,6,23,.35);
+    transition: transform .16s ease, box-shadow .16s ease;
+    position:relative; overflow:hidden; color:var(--text);
+  }
+  .team-card::before{
+    content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    padding:1px;
+    background: linear-gradient(135deg, rgba(14,165,233,.3), rgba(59,130,246,.3));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    opacity: 0; transition: opacity .16s ease;
+  }
+  .team-card:hover{ transform: translateY(-2px); box-shadow: 0 16px 40px rgba(2,6,23,.45); }
+  .team-card:hover::before{ opacity:.95; }
+  .team-card-link:focus-visible .team-card{ box-shadow: 0 0 0 3px rgba(14,165,233,.35); }
+
+  /* ====== LEFT: LOGO ====== */
+  .team-logo-round{
+    width:52px; height:52px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.10);
+    position:relative; overflow:hidden; flex: 0 0 auto;
+  }
+  .team-logo-round img{ width:100%; height:100%; object-fit:cover; border-radius:50%; }
+  .team-logo-round::after{
+    content:""; position:absolute; inset:-2px; border-radius:50%;
+    background: radial-gradient(60% 60% at 50% 50%, rgba(14,165,233,.35), rgba(14,165,233,0) 70%);
+    pointer-events:none;
+  }
+
+  /* ====== MIDDLE: TEXT ====== */
+  .team-main{ display:flex; gap:12px; align-items:center; min-width:0; }
+  .team-text{ min-width:0; }
+  .team-title{
+    font-weight:800; letter-spacing:.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .team-title .crown{ color:#ffd166; margin-left:.35rem; }
+
+  .team-meta{
+    font-size:.86rem; color:var(--muted);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+
+  /* ====== MEMBER STACK ====== */
+  .member-stack{ display:flex; align-items:center; gap:6px; }
+  .m-avatars{ display:flex; align-items:center; }
+  .m-avatar{
+    width:22px; height:22px; border-radius:50%; object-fit:cover;
+    border:1px solid rgba(255,255,255,.5); margin-left:-8px;
+    background: rgba(255,255,255,.06);
+  }
+  .m-avatar:first-child{ margin-left:0; }
+  .m-more{ font-size:.78rem; color:var(--muted); margin-left:.35rem; }
+
+  /* ====== BADGES ====== */
+  .badge-chip{
+    border-radius:999px; padding:.2rem .55rem; font-weight:700; font-size:.72rem;
+    border:1px solid rgba(255,255,255,.22);
+    background: rgba(255,255,255,.06); color:var(--text);
+  }
+  .badge-chip.captain{ background: rgba(245,158,11,.18); border-color: rgba(245,158,11,.28); color:#fff; }
+  .badge-chip.invites{ background: rgba(99,102,241,.20); border-color: rgba(99,102,241,.35); }

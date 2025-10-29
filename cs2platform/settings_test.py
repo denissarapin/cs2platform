@@ -1,0 +1,76 @@
+# cs2platform/settings_test.py
+from pathlib import Path
+import os
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# --- безопасные переменные окружения для тестов ---
+SECRET_KEY = "test-secret-key"
+DEBUG = True
+ALLOWED_HOSTS = ["*"]
+
+# Ключи: просто заглушки, НИЧЕГО не падает
+FACEIT_API_KEY = os.getenv("FACEIT_API_KEY", "dummy")
+STEAM_WEB_API_KEY = os.getenv("STEAM_WEB_API_KEY", "dummy")
+
+AUTH_USER_MODEL = "accounts.User"
+
+INSTALLED_APPS = [
+    'django.contrib.admin', 'django.contrib.auth', 'django.contrib.contenttypes',
+    'django.contrib.sessions', 'django.contrib.messages', 'django.contrib.staticfiles',
+    'rest_framework', 'accounts', 'teams', 'servers', 'tournaments', 'channels',
+    'django.contrib.sites', 'django.contrib.humanize',
+]
+
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+ROOT_URLCONF = 'cs2platform.urls'
+
+TEMPLATES = [{
+    'BACKEND': 'django.template.backends.django.DjangoTemplates',
+    'DIRS': [BASE_DIR / "templates"],
+    'APP_DIRS': True,
+    'OPTIONS': {'context_processors': [
+        'django.template.context_processors.request',
+        'django.contrib.auth.context_processors.auth',
+        'django.contrib.messages.context_processors.messages',
+    ]},
+}]
+
+ASGI_APPLICATION = "cs2platform.asgi.application"
+WSGI_APPLICATION = "cs2platform.wsgi.application"
+
+# --- SQLite для тестов ---
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / "test.sqlite3",
+    }
+}
+
+# --- InMemory канал-лейер для Channels ---
+CHANNEL_LAYERS = {
+    "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
+}
+
+LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'UTC'
+USE_I18N = True
+USE_TZ = True
+
+STATIC_URL = "/static/"
+STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
