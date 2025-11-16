@@ -1,6 +1,12 @@
+import inspect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib import messages
+from django.urls import reverse
+from django.http import HttpResponse
+from django.db import transaction
+from django.template.loader import render_to_string
+from django.templatetags.static import static
 from .models import Tournament, TournamentTeam, Match, MapBan, MAP_POOL
 from teams.models import Team
 from .forms import TournamentForm, TournamentSettingsForm
@@ -8,13 +14,10 @@ from .services import generate_full_bracket, set_match_result, update_bracket_pr
 from .permissions import staff_or_tadmin
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
-from tournaments.models import Tournament, Match
-from django.template.loader import render_to_string
-from django.templatetags.static import static
 from datetime import timedelta
-from django.urls import reverse
-from django.http import HttpResponse
-from django.db import transaction
+from django.views.decorators.http import require_POST
+from django.conf import settings
+from django.db.models import Max
 
 def staff_required(fn):
     return user_passes_test(lambda u: u.is_staff)(fn)
@@ -32,20 +35,19 @@ def tournament_create(request):
             t = form.save(commit=False)
             t.created_by = request.user
             t.save()
-            messages.success(request, "Турнир создан")
+            messages.success(request, "Tournament created")
             return redirect("tournaments:overview", pk=t.pk)
     else:
         form = TournamentForm()
     return render(request, "tournaments/tournament_form.html", {
         "form": form,
-        "title": "Создать турнир",
+        "title": "Create tournament",
     })
 
 def tournament_list(request):
     tournaments = Tournament.objects.all().order_by("-start_date")
     return render(request, "tournaments/tournament_list.html", {"tournaments": tournaments})
 
-@login_required
 def tournament_overview(request, pk):
     t = get_object_or_404(Tournament, pk=pk)
     participants = t.participants.select_related("team")
@@ -77,25 +79,50 @@ def tournament_overview(request, pk):
     ctx.update(_hero_ctx(request, t))
     return render(request, "tournaments/overview.html", ctx)
 
-
 @login_required
 def tournament_bracket(request, pk):
     t = get_object_or_404(Tournament, pk=pk)
     update_bracket_progression(t)
-
+    matches = (
+        t.matches
+         .select_related("team_a", "team_b", "winner")
+         .order_by("round", "id")
+    )
+    by_round = {}
+    for m in matches:
+        by_round.setdefault(m.round, []).append(m)
+    max_round = matches.aggregate(m=Max("round"))["m"] or 1
+    def _round_label(r: int, max_r: int) -> str:
+        dist = max_r - r 
+        if dist == 0:
+            return "Final"
+        if dist == 1:
+            return "Semi finals"
+        if dist == 2:
+            return "Quarter finals"
+        size = 2 ** (dist + 1) 
+        return f"Round of {size}"
+    rounds = [
+        {"num": r, "label": _round_label(r, max_round), "matches": by_round.get(r, [])}
+        for r in sorted(by_round.keys())
+    ]
     ctx = {
         "tournament": t,
         "active_tab": "bracket",
         "can_manage": _can_manage(request.user, t),
+        "rounds": rounds, 
     }
     ctx.update(_hero_ctx(request, t))
     return render(request, "tournaments/bracket.html", ctx)
 
-
 def _hero_ctx(request, t):
     cover_url = t.cover.url if getattr(t, "cover", None) else static("img/tournaments/default.jpg")
     logo_url  = t.logo.url  if getattr(t, "logo",  None) else static("img/tournaments/logo.jpg")
-    captain_teams = request.user.captain_teams.all() if request.user.is_authenticated else t.participants.none()
+    captain_teams = (
+        request.user.captain_teams.all()
+        if request.user.is_authenticated
+        else Team.objects.none()
+    )
     registered_count = t.participants.count()
     can_join = (request.user.is_authenticated and t.is_open_for_registration and captain_teams.exists() and (registered_count < t.max_teams))
     user_team_ids = set(captain_teams.values_list("id", flat=True))
@@ -113,59 +140,46 @@ def _hero_ctx(request, t):
 @staff_or_tadmin
 def toggle_registration(request, pk):
     t = get_object_or_404(Tournament, pk=pk)
-
     if t.status != "upcoming":
-        messages.error(request, "Регистрацию можно изменять только до начала турнира.")
+        messages.error(request, "Registration can only be modified before the tournament starts.")
         return redirect("tournaments:settings", pk=pk)
-
     t.registration_open = not t.registration_open
     t.save(update_fields=["registration_open"])
-    messages.success(request, "Регистрация " + ("открыта" if t.registration_open else "закрыта"))
+    messages.success(request, "Registration " + ("opened" if t.registration_open else "closed"))
     return redirect("tournaments:settings", pk=pk)
 
 @staff_or_tadmin
+@require_POST
 def start_tournament(request, pk):
     t = get_object_or_404(Tournament, pk=pk)
-
-    # уже запущен → просто на сетку
     if t.status == "running":
         return redirect("tournaments:bracket", pk=pk)
 
-    # минимальная валидация
-    if t.participants.count() < 2:
-        messages.error(request, "Нужно минимум 2 команды, чтобы запустить турнир.")
-        return redirect("tournaments:overview", pk=pk)
+    min_teams = getattr(settings, "TOURNAMENT_MIN_TEAMS", 4)
+    if t.participants.count() < min_teams:
+        messages.error(request, f"You need at least {min_teams} teams to start the tournament.")
+        form = TournamentSettingsForm(instance=t)
+        for name in ("start_date", "end_date"):
+            v = getattr(t, name, None)
+            if v:
+                form.initial[name] = v.strftime("%Y-%m-%dT%H:%M")
+        ctx = {
+            "tournament": t,
+            "active_tab": "settings",
+            "form": form,
+            "can_manage": _can_manage(request.user, t),
+        }
+        ctx.update(_hero_ctx(request, t))
+        return render(request, "tournaments/settings.html", ctx, status=200)
 
-    try:
-        with transaction.atomic():
-            # если сетка ещё не создана — создаём
-            if not t.matches.exists():
-                generate_full_bracket(t)
+    with transaction.atomic():
+        generate_full_bracket(t)
+        update_bracket_progression(t)
+        t.status = "running"
+        t.registration_open = False
+        t.save(update_fields=["status", "registration_open"])
 
-            # продвигаем победителей BYE и дальше по сетке
-            update_bracket_progression(t)
-
-            # переводим турнир в статус running и закрываем регистрацию
-            t.status = "running"
-            t.registration_open = False
-            t.save(update_fields=["status", "registration_open"])
-
-    except ValueError as e:
-        messages.error(request, str(e))
-        return redirect("tournaments:overview", pk=pk)
-
-    # уведомим WebSocket-группу «матчи турнира», чтобы фронт обновился
-    channel_layer = get_channel_layer()
-    async_to_sync(channel_layer.group_send)(
-        f"tournament_matches_{t.id}",
-        {
-            "type": "matches_update",
-            "action": "bracket_generated",
-            "message": "Tournament started and bracket generated",
-        },
-    )
-
-    messages.success(request, "Турнир запущен. Сетка сгенерирована.")
+    messages.success(request, "Tournament started. Bracket generated.")
     return redirect("tournaments:bracket", pk=pk)
 
 @login_required
@@ -224,15 +238,40 @@ def tournament_settings(request, pk):
         return HttpResponseForbidden()
 
     if request.method == "POST":
-        form = TournamentSettingsForm(request.POST, instance=t)
+        data = request.POST.copy()
+        from .forms import HTML_DT
+
+        def _maybe_set(name, value):
+            if name in data:
+                return
+            if value is None:
+                return
+            if hasattr(value, "strftime"):
+                data[name] = value.strftime(HTML_DT)
+            elif isinstance(value, bool):
+                if value is True:  
+                    data[name] = "on"
+            else:
+                data[name] = str(value)
+        _maybe_set("start_date", getattr(t, "start_date", None))
+        _maybe_set("end_date", getattr(t, "end_date", None))
+        _maybe_set("status", getattr(t, "status", None))
+        _maybe_set("max_teams", getattr(t, "max_teams", None))
+        _maybe_set("registration_open", getattr(t, "registration_open", None))
+
+        form = TournamentSettingsForm(data, instance=t)
         if form.is_valid():
             obj = form.save(commit=False)
             bo_name = getattr(form, "_bo_field_name", None)
             if bo_name and bo_name in form.cleaned_data:
                 setattr(obj, bo_name, int(form.cleaned_data[bo_name]))
             obj.save()
-            messages.success(request, "Настройки турнира сохранены.")
+            messages.success(request, "Tournament settings saved")
             return redirect("tournaments:settings", pk=t.pk)
+        else:
+            messages.info(request, "Settings not changed")
+            return redirect("tournaments:settings", pk=t.pk)
+
     else:
         form = TournamentSettingsForm(instance=t)
         for name in ("start_date", "end_date"):
@@ -249,11 +288,22 @@ def tournament_settings(request, pk):
     ctx.update(_hero_ctx(request, t))
     return render(request, "tournaments/settings.html", ctx)
 
+@staff_required
+def delete_tournament(request, pk):
+    t = get_object_or_404(Tournament, pk=pk)
+    if request.method == "POST":
+        name = t.name
+        t.delete()
+        messages.success(request, f'Tournament "{name}" has been deleted.')
+        return redirect("tournaments:list")
+    messages.info(request, "Please confirm deletion by clicking the button.")
+    return redirect("tournaments:settings", pk=pk)
+
 @staff_or_tadmin
 def generate_tournament_bracket(request, pk):
     t = get_object_or_404(Tournament, pk=pk)
     generate_full_bracket(t)
-    messages.success(request, "Сетка сгенерирована")
+    messages.success(request, "Bracket generated")
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(
         f"tournament_matches_{t.id}",
@@ -265,39 +315,32 @@ def generate_tournament_bracket(request, pk):
     )
     return redirect("tournaments:bracket", pk=pk)
 
-
-
-
 def send_ws_update(match):
     channel_layer = get_channel_layer()
-    async_to_sync(channel_layer.group_send)(
-        f"tournament_{match.tournament_id}",
-        {
-            "type": "bracket_update",
-            "match_id": match.id,
-            "html": render_to_string("tournaments/_match.html", {"match": match}),
-        }
-    )
+    payload = {
+        "type": "bracket_update",
+        "match_id": match.id,
+        "html": render_to_string("tournaments/_match.html", {"match": match}),
+    }
+    group = f"tournament_{match.tournament_id}"
 
+    if inspect.iscoroutinefunction(channel_layer.group_send):
+        async_to_sync(channel_layer.group_send)(group, payload)
+    else:
+        channel_layer.group_send(group, payload)
 
 @staff_or_tadmin
 def report_match_result(request, pk, match_id):
     t = get_object_or_404(Tournament, pk=pk)
     m = get_object_or_404(Match, pk=match_id, tournament=t)
     is_htmx = request.headers.get("HX-Request") == "true"
+
     if request.method == "GET":
-        if is_htmx:
-            html = render_to_string(
-                "tournaments/_report_form.html",
-                {"tournament": t, "match": m, "request": request}
-            )
-            return HttpResponse(html)
-        return render(request, "tournaments/report_match.html", {
-            "tournament": t,
-            "match": m,
-            "active_tab": "matches",
-            "can_manage": _can_manage(request.user, t),
-        })
+        html = render_to_string(
+            "tournaments/_report_form.html",
+            {"tournament": t, "match": m, "request": request},
+        )
+        return HttpResponse(html)
     try:
         a = int(request.POST.get("score_a", "0"))
         b = int(request.POST.get("score_b", "0"))
@@ -308,12 +351,12 @@ def report_match_result(request, pk, match_id):
                 {
                     "tournament": t,
                     "match": m,
-                    "error": "Неверный формат счёта.",
+                    "error": "Invalid score format",
                     "request": request,
                 }
             )
             return HttpResponse(html, status=400)
-        messages.error(request, "Неверный формат счёта.")
+        messages.error(request, "Invalid score format")
         return redirect("tournaments:matches", pk=pk)
 
     set_match_result(m, a, b)
@@ -327,7 +370,7 @@ def report_match_result(request, pk, match_id):
         resp["HX-Trigger"] = "match-updated"
         return resp
 
-    messages.success(request, "Результат сохранён")
+    messages.success(request, "Result saved")
     return redirect("tournaments:matches", pk=pk)
 
 @login_required
@@ -335,13 +378,13 @@ def register_team(request, pk, team_id):
     t = get_object_or_404(Tournament, pk=pk)
     team = get_object_or_404(Team, pk=team_id)
     if team.captain != request.user:
-        messages.error(request, "Только капитан может регистрировать команду.")
+        messages.error(request, "Only the captain can register a team")
         return redirect("tournaments:overview", pk=pk)
     if not t.is_open_for_registration:
-        messages.error(request, "Регистрация закрыта.")
+        messages.error(request, "Registration is closed")
         return redirect("tournaments:overview", pk=pk)
     if t.participants.count() >= t.max_teams:
-        messages.error(request, "Мест больше нет.")
+        messages.error(request, "No more slots available")
         return redirect("tournaments:overview", pk=pk)
     TournamentTeam.objects.get_or_create(tournament=t, team=team)
     url = reverse("tournaments:overview", args=[pk])
@@ -352,45 +395,58 @@ def match_detail(request, pk, match_id):
     from .models import Tournament, Match, MAP_POOL
     tournament = get_object_or_404(Tournament, pk=pk)
     match = get_object_or_404(Match, pk=match_id, tournament=tournament)
+
     if match.veto_state == "idle" and match.team_a_id and match.team_b_id:
         match.start_veto()
     match.auto_ban_if_expired()
+
     if request.method == "POST":
-        code = request.POST.get("map_name")
+        code = (
+            request.POST.get("map_name")
+            or request.POST.get("map")
+            or request.POST.get("code")
+            or request.POST.get("map_code")
+            or request.GET.get("map")
+            or request.GET.get("code")
+        )
+
         if code:
             match.auto_ban_if_expired()
             team = match.current_team
             if team and code in match.available_map_codes():
                 match.ban_map(code, team, action="ban")
-            final_map = None
-            if match.final_map_code:
-                final_map = (
-                    match.final_map_code,
-                    dict(MAP_POOL).get(match.final_map_code, match.final_map_code),
-                )
-            deadline_ts = int(match.veto_deadline.timestamp() * 1000) if match.veto_deadline else None
-            html = render_to_string(
-                "tournaments/match_detail_inner.html",
-                {
-                    "tournament": tournament,
-                    "match": match,
-                    "bans": match.map_bans.select_related("team").order_by("order"),
-                    "map_pool": MAP_POOL,
-                    "available_codes": match.available_map_codes(),
-                    "final_map": final_map,
-                    "current_team": match.current_team if not final_map else None,
-                    "deadline_ts": deadline_ts,
-                    "server_addr": match.server_addr or "192.168.1.56:27015",
-                    "connect_cmd": f"connect {match.server_addr or '192.168.1.56:27015'}",
-                    "request": request,
-                },
+
+        final_map = None
+        if match.final_map_code:
+            final_map = (
+                match.final_map_code,
+                dict(MAP_POOL).get(match.final_map_code, match.final_map_code),
             )
-            channel_layer = get_channel_layer()
-            async_to_sync(channel_layer.group_send)(
-                f"match_{match.id}",
-                {"type": "match_update", "html": html},
-            )
+        deadline_ts = int(match.veto_deadline.timestamp() * 1000) if match.veto_deadline else None
+
+        html = render_to_string(
+            "tournaments/match_detail_inner.html",
+            {
+                "tournament": tournament,
+                "match": match,
+                "bans": match.map_bans.select_related("team").order_by("order"),
+                "map_pool": MAP_POOL,
+                "available_codes": match.available_map_codes(),
+                "final_map": final_map,
+                "current_team": match.current_team if not final_map else None,
+                "deadline_ts": deadline_ts,
+                "server_addr": match.server_addr or "192.168.1.56:27015",
+                "connect_cmd": f"connect {match.server_addr or '192.168.1.56:27015'}",
+                "request": request,
+            },
+        )
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f"match_{match.id}",
+            {"type": "match_update", "html": html},
+        )
         return redirect("tournaments:match_detail", pk=pk, match_id=match_id)
+
     final_map = None
     if match.final_map_code:
         final_map = (
@@ -398,6 +454,7 @@ def match_detail(request, pk, match_id):
             dict(MAP_POOL).get(match.final_map_code, match.final_map_code),
         )
     deadline_ts = int(match.veto_deadline.timestamp() * 1000) if match.veto_deadline else None
+
     return render(
         request,
         "tournaments/match_detail.html",
@@ -449,34 +506,38 @@ def match_veto(request, pk, match_id):
     ban_order = match.map_bans.count()
     current_team = None
     if not final_map and match.team_a and match.team_b:
-        ban_order = match.map_bans.count()
         current_team = match.team_a if ban_order % 2 == 0 else match.team_b
 
     if request.method == "POST" and not final_map:
         map_choice = request.POST.get("map_name")
         if not map_choice:
-            messages.error(request, "Выберите карту.")
+            messages.error(request, "Select a map")
             return redirect("tournaments:match_veto", pk=pk, match_id=match.id)
 
         if current_team and request.user == current_team.captain:
             if perform_ban(match, current_team, map_choice):
-                messages.success(request, f"Карта {map_choice} забанена")
+                messages.success(request, f"Map {map_choice} banned")
             else:
-                messages.error(request, "Эта карта уже недоступна.")
+                messages.error(request, "This map is already unavailable")
         else:
-            messages.error(request, "Сейчас не ваша очередь банить карту.")
+            messages.error(request, "It’s not your turn to ban a map")
 
         return redirect("tournaments:match_veto", pk=pk, match_id=match.id)
 
-    return render(request, "tournaments/match_veto.html", {
-        "tournament": tournament,
-        "match": match,
-        "available_maps": available,
-        "available_codes": available_codes,
-        "bans": match.map_bans.select_related("team"),
-        "final_map": final_map,
-        "map_pool": MAP_POOL,
-        "current_team": current_team,
-        "can_manage": _can_manage(request.user, tournament),
-    })
+    html = render_to_string(
+        "tournaments/_veto_panel.html",
+        {
+            "tournament": tournament,
+            "match": match,
+            "available_maps": available,
+            "available_codes": available_codes,
+            "bans": match.map_bans.select_related("team"),
+            "final_map": final_map,
+            "map_pool": MAP_POOL,
+            "current_team": current_team,
+            "can_manage": _can_manage(request.user, tournament),
+            "request": request,
+        },
+    )
+    return HttpResponse(html)
 

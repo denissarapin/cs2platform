@@ -2,105 +2,105 @@
 {% load static %}
 {% block title %}{{ tournament.name }} — Settings{% endblock %}
 {% block body_class %}tournaments-page{% endblock %}
-
 {% block content %}
-
-  {# общий верх (баннер + табы + кнопка Settings) #}
-  {% include "tournaments/_hero.html" with active_tab="settings" %}
-
-  <div class="ov-grid">
-    {# ----- Основные параметры ----- #}
-    <section class="ov-card">
-      <div class="ov-card-h">Параметры турнира</div>
-
-      <form method="post" class="vstack gap-3">
-        {% csrf_token %}
-
-        {% if form.non_field_errors %}
-          <div class="alert alert-danger">{{ form.non_field_errors }}</div>
-        {% endif %}
-
-        <div class="row g-3">
-
-          {# Team size — только если поле есть в форме #}
-          {% if form.team_size %}
-          <div class="col-sm-6">
-            <label class="form-label">Team size</label>
-            {{ form.team_size }}
-            {% if form.team_size.errors %}<div class="text-danger small">{{ form.team_size.errors }}</div>{% endif %}
-          </div>
-          {% endif %}
-
-          {% if form.max_teams %}
-          <div class="col-sm-6">
-            <label class="form-label">Max teams</label>
-            {{ form.max_teams }}
-            {% if form.max_teams.errors %}<div class="text-danger small">{{ form.max_teams.errors }}</div>{% endif %}
-          </div>
-          {% endif %}
-
-          {% if form.end_date %}
-          <div class="col-sm-6">
-            <label class="form-label">End date</label>
-            {{ form.end_date }}
-            {% if form.end_date.errors %}<div class="text-danger small">{{ form.end_date.errors }}</div>{% endif %}
-          </div>
-          {% endif %}
-
-          {# Match rules — берём любое доступное имя поля #}
-          {% if form.match_best_of or form.best_of or form.bo %}
-          <div class="col-sm-6">
-            <label class="form-label">Match rules</label>
-            {{ form.match_best_of|default:form.best_of|default:form.bo }}
-          </div>
-          {% endif %}
+{% include "tournaments/_hero.html" with active_tab="settings" %}
+<div class="ov-grid">
+  <section class="ov-card">
+    <div class="ov-card-h">Tournament settings</div>
+    <form method="post" class="vstack gap-3">
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+      {% endif %}
+      <div class="row g-3">
+        {% if form.team_size %}
+        <div class="col-sm-6">
+          <label class="form-label">Team size</label>
+          {{ form.team_size }}
+          {% if form.team_size.errors %}<div class="text-danger small">{{ form.team_size.errors }}</div>{% endif %}
         </div>
-
-        <div class="d-flex gap-2 mt-1">
+        {% endif %}
+        {% if form.max_teams %}
+        <div class="col-sm-6">
+          <label class="form-label">Max teams</label>
+          {{ form.max_teams }}
+          {% if form.max_teams.errors %}<div class="text-danger small">{{ form.max_teams.errors }}</div>{% endif %}
+        </div>
+        {% endif %}
+        {% if form.end_date %}
+        <div class="col-sm-6">
+          <label class="form-label">End date</label>
+          {{ form.end_date }}
+          {% if form.end_date.errors %}<div class="text-danger small">{{ form.end_date.errors }}</div>{% endif %}
+        </div>
+        {% endif %}
+        {% if form.match_best_of or form.best_of or form.bo %}
+        <div class="col-sm-6">
+          <label class="form-label">Match rules</label>
+          {{ form.match_best_of|default:form.best_of|default:form.bo }}
+        </div>
+        {% endif %}
+      </div>
+      <div class="d-flex justify-content-between mt-1 align-items-center">
+        <div class="d-flex gap-2">
           <button class="btn btn-brand" type="submit">
-            <i class="bi bi-save"></i> Сохранить
+            <i class="bi bi-save"></i> Save
           </button>
           <a class="btn btn-outline-light" href="{% url 'tournaments:overview' tournament.pk %}">
-            Отмена
+            Cancel
           </a>
         </div>
-      </form>
-    </section>
 
-    {# ----- Быстрые действия ----- #}
-    <section class="ov-card">
-      <div class="ov-card-h">Быстрые действия</div>
-
-      <div class="d-grid gap-2">
-
-        {# Кнопка регистрации только до старта турнира #}
-        {% if tournament.status == "upcoming" %}
-          <a class="btn {% if tournament.registration_open %}btn-outline-light{% else %}btn-success{% endif %}"
-            href="{% url 'tournaments:toggle_registration' tournament.pk %}">
-            {% if tournament.registration_open %}
-              <i class="bi bi-lock"></i> Закрыть регистрацию
-            {% else %}
-              <i class="bi bi-unlock"></i> Открыть регистрацию
-            {% endif %}
-          </a>
+        {% if request.user.is_staff %}
+          <button type="submit" class="btn btn-outline-danger ms-auto" formaction="{% url 'tournaments:delete' tournament.pk %}" formmethod="post" formnovalidate onclick="return confirm('Delete tournament? This action cannot be undone.');">
+            <i class="bi bi-trash"></i> Delete tournament
+          </button>
         {% endif %}
-
-        <a href="{% url 'tournaments:generate_bracket' tournament.pk %}"
-          class="btn btn-dark">
-          <i class="bi bi-diagram-3"></i> Сгенерировать сетку
+      </div>
+    </form>
+  </section>
+  <section class="ov-card">
+    <div class="ov-card-h">Quick actions</div>
+    <div class="d-grid gap-2">
+      {% if tournament.status == "upcoming" %}
+        <a class="btn {% if tournament.registration_open %}btn-outline-light{% else %}btn-success{% endif %}"
+          href="{% url 'tournaments:toggle_registration' tournament.pk %}">
+          {% if tournament.registration_open %}
+            <i class="bi bi-lock"></i> Close registration
+          {% else %}
+            <i class="bi bi-unlock"></i> Open registration
+          {% endif %}
         </a>
+      {% endif %}
+      <a href="{% url 'tournaments:generate_bracket' tournament.pk %}"
+        class="btn btn-dark">
+        <i class="bi bi-diagram-3"></i> Generate bracket
+      </a>
+      {% if tournament.status == "upcoming" %}
+        {% with min_teams=4 current=tournament.participants.count %}
+          <form method="post" action="{% url 'tournaments:start' tournament.pk %}" class="d-grid">
+            {% csrf_token %}
+            <button
+              class="btn btn-outline-light w-100"
+              type="submit"
+              {% if current < min_teams %}disabled aria-disabled="true"
+                title="Need at least {{ min_teams }} teams to start ({{ current }}/{{ min_teams }})."
+              {% endif %}
+            >
+              <i class="bi bi-play-circle"></i> Start tournament
+            </button>
 
-        {% if tournament.status == "upcoming" %}
-          <a href="{% url 'tournaments:start' tournament.pk %}" class="btn btn-outline-light">
-            <i class="bi bi-play-circle"></i> Запустить турнир
-          </a>
-        {% endif %}
-      </div>
+            {% if current < min_teams %}
+              <div class="form-text text-light text-center mt-1">
+                Need at least {{ min_teams }} teams to start ({{ current }}/{{ min_teams }})
+              </div>
+            {% endif %}
+          </form>
+        {% endwith %}
+      {% endif %}
+    </div>
+  </section>
+</div>
 
-      <div class="text-muted mt-3" style="font-size:.9rem;">
-      </div>
-    </section>
-  </div>
-
-  {% include "tournaments/_join_modal.html" %}
+{% include "tournaments/_join_modal.html" %}
 {% endblock %}

@@ -1,4 +1,3 @@
-# teams/models.py
 import uuid
 from django.conf import settings
 from django.db import models
@@ -11,7 +10,7 @@ class Team(models.Model):
     slug = models.SlugField(max_length=64, unique=True, blank=True)
     logo = models.ImageField(upload_to='team_logos/', blank=True, null=True)
     captain = models.ForeignKey(
-        settings.AUTH_USER_MODEL,  # ✅ используем напрямую строку из settings
+        settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         related_name='captain_teams'
     )
@@ -27,15 +26,13 @@ class Team(models.Model):
     def __str__(self):
         return f"[{self.tag}] {self.name}"
 
-
 class TeamMembership(models.Model):
     ROLE_CHOICES = (
         ('captain', 'Captain'),
         ('player', 'Player'),
     )
-
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,  # ✅ здесь тоже напрямую из settings
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='team_memberships'
     )

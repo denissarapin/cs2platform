@@ -1,4 +1,3 @@
-# tournaments/permissions.py
 from django.http import HttpResponseForbidden
 from .models import Tournament
 

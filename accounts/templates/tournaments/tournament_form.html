@@ -2,40 +2,33 @@
 {% load static %}
 {% block title %}{{ title }}{% endblock %}
 {% block body_class %}create-tournament-page{% endblock %}
-
 {% block content %}
-
 <div class="tf-bg">
   <div class="tf-noise"></div>
 </div>
-
 <div class="container tf-container">
   <div class="row justify-content-center">
     <div class="col-12 col-lg-10">
       <div class="tf-card card-dark card-ring">
         <div class="tf-head">
           <h1 class="tf-title">{{ title }}</h1>
-          <p class="tf-sub">Заполни поля ниже и загрузите изображения турнира.</p>
+          <p class="tf-sub">Fill in the fields below and upload the tournament images.</p>
           {% if form.non_field_errors %}
             <div class="alert alert-danger py-2 px-3 mb-0">
               {{ form.non_field_errors }}
             </div>
           {% endif %}
         </div>
-
         <form method="post" enctype="multipart/form-data" class="tf-form">
           {% csrf_token %}
           <div class="row g-4">
-            <!-- LEFT: text fields -->
             <div class="col-12 col-lg-6">
               <label class="form-label tf-label">Name</label>
               {{ form.name }}
               {% if form.name.errors %}<div class="invalid-feedback d-block">{{ form.name.errors|striptags }}</div>{% endif %}
-
               <label class="form-label tf-label mt-3">Description</label>
               {{ form.description }}
               {% if form.description.errors %}<div class="invalid-feedback d-block">{{ form.description.errors|striptags }}</div>{% endif %}
-
               <div class="row g-3 mt-1">
                 <div class="col-12">
                   <label class="form-label tf-label">Start date</label>
@@ -55,10 +48,7 @@
                 </div>
               </div>
             </div>
-
-            <!-- RIGHT: uploads -->
             <div class="col-12 col-lg-6">
-              <!-- Logo upload (square) -->
               <label class="form-label tf-label">Logo</label>
               <div class="tf-upload" data-target="id_logo">
                 <input id="id_logo" name="{{ form.logo.name }}" type="file" accept="image/*" class="tf-file">
@@ -66,15 +56,13 @@
                   <div class="tf-thumb tf-thumb--square" id="logoPreview"
                        style="background-image:url('{% static "img/tournaments/default-logo.png" %}');"></div>
                   <div class="tf-up-body">
-                    <div class="tf-up-title">Перетащите сюда или <span class="tf-browse">выберите файл</span></div>
-                    <div class="tf-up-sub">PNG/JPG, до ~10MB. Лучше квадратное изображение.</div>
-                    <div class="tf-up-name" id="logoName">Файл не выбран</div>
+                    <div class="tf-up-title">Drag and drop here or <span class="tf-browse">choose a file</span></div>
+                    <div class="tf-up-sub">PNG/JPG, up to ~10MB. A square image is best.</div>
+                    <div class="tf-up-name" id="logoName">No file selected</div>
                   </div>
                 </div>
               </div>
               {% if form.logo.errors %}<div class="invalid-feedback d-block mt-1">{{ form.logo.errors|striptags }}</div>{% endif %}
-
-              <!-- Poster upload (wide) -->
               <label class="form-label tf-label mt-4">Poster</label>
               <div class="tf-upload" data-target="id_poster">
                 <input id="id_poster" name="{{ form.poster.name }}" type="file" accept="image/*" class="tf-file">
@@ -82,18 +70,17 @@
                   <div class="tf-thumb tf-thumb--wide" id="posterPreview"
                        style="background-image:url('{% static "img/tournaments/default-cover.jpg" %}');"></div>
                   <div class="tf-up-body">
-                    <div class="tf-up-title">Перетащите сюда или <span class="tf-browse">выберите файл</span></div>
-                    <div class="tf-up-sub">Рекомендуется 1600×600 или более (соотношение ~16:6).</div>
-                    <div class="tf-up-name" id="posterName">Файл не выбран</div>
+                    <div class="tf-up-title">Drag and drop here or <span class="tf-browse">choose a file</span></div>
+                    <div class="tf-up-sub">Recommended 1600×600 or larger (≈16:6 aspect).</div>
+                    <div class="tf-up-name" id="posterName">No file selected</div>
                   </div>
                 </div>
               </div>
               {% if form.poster.errors %}<div class="invalid-feedback d-block mt-1">{{ form.poster.errors|striptags }}</div>{% endif %}
             </div>
           </div>
-
           <div class="d-grid mt-4">
-            <button class="btn btn-brand btn-lg tf-save">Сохранить</button>
+            <button class="btn btn-brand btn-lg tf-save">Save</button>
           </div>
         </form>
       </div>
@@ -102,14 +89,13 @@
 </div>
 
 <style>
-
 .tf-bg{
   position: fixed; inset: 0;
   background:
     linear-gradient(180deg, rgba(11,19,36,.65), rgba(10,16,32,.75)),
     url("{% static 'img/bg/tournament_bg.jpg' %}") center/cover no-repeat fixed;
-  z-index: 0;              /* было -2 */
-  pointer-events: none;    /* чтобы клик не перекрывал контент */
+  z-index: 0;
+  pointer-events: none;
 }   
   .tf-container{ padding-top:28px; padding-bottom:36px; }
 .tf-file{
@@ -118,102 +104,92 @@
   width:1px; height:1px;
   overflow:hidden;
 }
-  /* ===== Card ===== */
-  .tf-card{
-    padding:18px 18px 22px;
-    background: rgba(13,19,33,.75);
-    border:1px solid rgba(148,163,184,.18);
-    box-shadow: 0 30px 80px rgba(2,6,23,.5);
-    border-radius:20px;
-  }
-  .tf-head{ text-align:center; margin-bottom:8px; color:#e6eeff; }
-  .tf-title{ font-weight:900; margin:0; }
-  .tf-sub{ opacity:.75; margin:.35rem 0 0; }
+.tf-card{
+  padding:18px 18px 22px;
+  background: rgba(13,19,33,.75);
+  border:1px solid rgba(148,163,184,.18);
+  box-shadow: 0 30px 80px rgba(2,6,23,.5);
+  border-radius:20px;
+}
+.tf-head{ text-align:center; margin-bottom:8px; color:#e6eeff; }
+.tf-title{ font-weight:900; margin:0; }
+.tf-sub{ opacity:.75; margin:.35rem 0 0; }
 
-  /* ===== Labels / inputs ===== */
-  .tf-label{ color:#cfe0ff; font-weight:700; letter-spacing:.2px; }
-  .tf-form .form-control, .tf-form .form-select{
-    background: rgba(255,255,255,.06);
-    border:1px solid rgba(148,163,184,.25);
-    color:#e6eeff;
-  }
-  .tf-form .form-control:focus, .tf-form .form-select:focus{
-    background: rgba(255,255,255,.08);
-    border-color: rgba(99,102,241,.65);
-    box-shadow: 0 0 0 .15rem rgba(99,102,241,.25);
-    color:#fff;
-  }
+.tf-label{ color:#cfe0ff; font-weight:700; letter-spacing:.2px; }
+.tf-form .form-control, .tf-form .form-select{
+  background: rgba(255,255,255,.06);
+  border:1px solid rgba(148,163,184,.25);
+  color:#e6eeff;
+}
+.tf-form .form-control:focus, .tf-form .form-select:focus{
+  background: rgba(255,255,255,.08);
+  border-color: rgba(99,102,241,.65);
+  box-shadow: 0 0 0 .15rem rgba(99,102,241,.25);
+  color:#fff;
+}
+.tf-input-ico{ position:relative; }
+.tf-input-ico i{
+  position:absolute; left:10px; top:50%; transform:translateY(-50%);
+  opacity:.7; color:#cfe0ff;
+}
+.tf-input-ico input{ padding-left:2.1rem; }
+.tf-upload .tf-drop{
+  display:flex; gap:16px; align-items:center;
+  background: rgba(255,255,255,.05);
+  border:1px dashed rgba(148,163,184,.35);
+  border-radius:14px; padding:12px; transition:.2s;
+}
+.tf-upload .tf-drop:hover{ border-color: rgba(99,102,241,.7); background: rgba(255,255,255,.07); cursor:pointer; }
+.tf-thumb{
+  flex:0 0 auto; border-radius:12px;
+  background-size:cover; background-position:center;
+  border:1px solid rgba(148,163,184,.25);
+  box-shadow:0 12px 28px rgba(2,6,23,.45);
+}
+.tf-thumb--square{ width:104px; height:104px; }
+.tf-thumb--wide{ width:184px; height:104px; }
+.tf-up-body{ color:#e6eeff; }
+.tf-up-title{ font-weight:800; }
+.tf-browse{ color:#a3c1ff; text-decoration:underline dotted; }
+.tf-up-sub{ opacity:.7; font-size:.9rem; }
+.tf-up-name{ opacity:.85; font-size:.9rem; margin-top:4px; }
+.tf-save{ font-weight:800; }
 
-  /* calendar icon wrapper */
-  .tf-input-ico{ position:relative; }
-  .tf-input-ico i{
-    position:absolute; left:10px; top:50%; transform:translateY(-50%);
-    opacity:.7; color:#cfe0ff;
-  }
-  .tf-input-ico input{ padding-left:2.1rem; }
-
-  /* ===== Uploads ===== */
-  .tf-upload .tf-drop{
-    display:flex; gap:16px; align-items:center;
-    background: rgba(255,255,255,.05);
-    border:1px dashed rgba(148,163,184,.35);
-    border-radius:14px; padding:12px; transition:.2s;
-  }
-  .tf-upload .tf-drop:hover{ border-color: rgba(99,102,241,.7); background: rgba(255,255,255,.07); cursor:pointer; }
-  .tf-thumb{
-    flex:0 0 auto; border-radius:12px;
-    background-size:cover; background-position:center;
-    border:1px solid rgba(148,163,184,.25);
-    box-shadow:0 12px 28px rgba(2,6,23,.45);
-  }
-  .tf-thumb--square{ width:104px; height:104px; }
-  .tf-thumb--wide{ width:184px; height:104px; }
-  .tf-up-body{ color:#e6eeff; }
-  .tf-up-title{ font-weight:800; }
-  .tf-browse{ color:#a3c1ff; text-decoration:underline dotted; }
-  .tf-up-sub{ opacity:.7; font-size:.9rem; }
-  .tf-up-name{ opacity:.85; font-size:.9rem; margin-top:4px; }
-  .tf-save{ font-weight:800; }
-
-  @media (max-width: 991px){
-    .tf-thumb--wide{ width:140px; height:90px; }
-    .tf-thumb--square{ width:90px; height:90px; }
-  }
-  .air-datepicker {
-    background: linear-gradient(180deg, rgba(16,23,38,.96), rgba(10,16,28,.96));
-    border: 1px solid rgba(148,163,184,.22);
-    color: #e6eeff;
-    box-shadow: 0 24px 60px rgba(2,6,23,.55);
-    border-radius: 12px;
-  }
-  .air-datepicker--content { padding: 10px 12px; }
-  .air-datepicker-cell.-selected-, .air-datepicker-cell.-selected-:hover {
-    background: rgba(14,165,233,.35);
-    color: #fff;
-  }
-  .air-datepicker-time--row input {
-    background: rgba(255,255,255,.06);
-    border: 1px solid rgba(148,163,184,.22);
-    color: #e6eeff;
-  }
-  .air-datepicker--buttons .air-datepicker-button {
-    color: #cfe0ff;
-  }
+@media (max-width: 991px){
+  .tf-thumb--wide{ width:140px; height:90px; }
+  .tf-thumb--square{ width:90px; height:90px; }
+}
+.air-datepicker {
+  background: linear-gradient(180deg, rgba(16,23,38,.96), rgba(10,16,28,.96));
+  border: 1px solid rgba(148,163,184,.22);
+  color: #e6eeff;
+  box-shadow: 0 24px 60px rgba(2,6,23,.55);
+  border-radius: 12px;
+}
+.air-datepicker--content { padding: 10px 12px; }
+.air-datepicker-cell.-selected-, .air-datepicker-cell.-selected-:hover {
+  background: rgba(14,165,233,.35);
+  color: #fff;
+}
+.air-datepicker-time--row input {
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(148,163,184,.22);
+  color: #e6eeff;
+}
+.air-datepicker--buttons .air-datepicker-button {
+  color: #cfe0ff;
+}
 </style>
-<link rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/air-datepicker@3.5.1/air-datepicker.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/air-datepicker@3.5.1/air-datepicker.min.css">
 <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.5.1/air-datepicker.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.5.1/locale/ru.min.js"></script>
 
 <script>
-  // helper: wire a pretty "drop zone" to hidden input
   function bindUpload(zone, inputId, previewId, nameId){
     const input = document.getElementById(inputId);
     const preview = document.getElementById(previewId);
     const nameBox = document.getElementById(nameId);
-
     const openPicker = () => input && input.click();
-
     zone.addEventListener('click', openPicker);
     zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
     zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
@@ -223,7 +199,6 @@
       input.files = e.dataTransfer.files;
       input.dispatchEvent(new Event('change'));
     });
-
     if (input){
       input.addEventListener('change', () => {
         const file = input.files && input.files[0];
@@ -235,7 +210,6 @@
       });
     }
   }
-
   document.addEventListener('DOMContentLoaded', function () {
     const opts = {
       locale: (window.AirDatepicker?.locales?.ru) || {},
@@ -247,18 +221,14 @@
       timeFormat: 'HH:mm',
       dateTimeSeparator: ' '
     };
-
     const s = document.getElementById('id_start_date');
     if (s) new AirDatepicker(s, opts);
-
     const e = document.getElementById('id_end_date');
     if (e) new AirDatepicker(e, opts);
     const logoZone   = document.querySelector('[data-target="id_logo"] .tf-drop');
     const posterZone = document.querySelector('[data-target="id_poster"] .tf-drop');
-
     if (logoZone)   bindUpload(logoZone,   'id_logo',   'logoPreview',   'logoName');
     if (posterZone) bindUpload(posterZone, 'id_poster', 'posterPreview', 'posterName');
   });
 </script>
-
 {% endblock %}

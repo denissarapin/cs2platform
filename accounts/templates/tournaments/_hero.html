@@ -1,23 +1,21 @@
 {% load static %}
+
 <div class="ov-hero card-dark card-ring">
   <div class="ov-hero-bg"
        style="background-image:url('{% if tournament.poster %}{{ tournament.poster.url }}{% else %}{% static "img/tournaments/default-cover.jpg" %}{% endif %}');">
   </div>
   <div class="ov-hero-scrim"></div>
-
   <div class="ov-hero-body">
     <div class="ov-left">
       <img class="ov-logo"
            src="{% if tournament.logo %}{{ tournament.logo.url }}{% else %}{% static 'img/tournaments/default-logo.png' %}{% endif %}"
            alt="logo">
       <h1 class="ov-title">{{ tournament.name }}</h1>
-
       <div class="ov-sub">
         <span class="ov-host">Hosted by {{ tournament.created_by|default:"CS2 Platform" }}</span>
         <span class="ov-sep">•</span>
         <span class="ov-date">{{ tournament.start_date|date:"D, d M Y, H:i" }}</span>
       </div>
-
       <div class="ov-chips">
         {% if tournament.status == "upcoming" %}
           {% if tournament.registration_open %}
@@ -32,7 +30,6 @@
         {% endif %}
       </div>
     </div>
-
     <div class="ov-right">
       {% if can_join %}
         <button type="button" class="btn btn-brand ov-join"
@@ -51,7 +48,6 @@
     </div>
   </div>
 </div>
-
 <div class="ov-tabs card-dark card-ring">
   <ul class="nav ov-nav nav-pills w-100">
     <li class="nav-item">
@@ -74,8 +70,6 @@
       <a class="nav-link {% if active_tab == 'results' %}active{% endif %}"
          href="{% url 'tournaments:results' tournament.pk %}">Results</a>
     </li>
-
-    {# ---- RIGHT SIDE: Settings ---- #}
     {% if can_manage %}
       <li class="nav-item ms-auto">
         <a class="nav-link {% if active_tab == 'settings' %}active{% endif %}"

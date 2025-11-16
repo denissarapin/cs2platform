@@ -1,47 +1,35 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Регистрация{% endblock %}
-
-{# отдельный класс для этой страницы #}
+{% block title %}Sign Up{% endblock %}
 {% block body_class %}register-page{% endblock %}
-
 {% block extra_css %}
 {{ block.super }}
 <style>
-  /* ==== ФОН СТРАНИЦЫ ==== */
   body.register-page:before{
     min-height: 100vh;
-    --register-bg: url("{% static 'img/bg/login.jpg' %}"); /* замени путь при необходимости */
+    --register-bg: url("{% static 'img/bg/login.jpg' %}");
     background:
       radial-gradient(1200px 260px at 95% -40%, rgba(245,158,11,.25) 0, rgba(245,158,11,0) 65%),
       linear-gradient(180deg, rgba(22,29,47,.20), rgba(13,20,35,.20)),
       var(--register-bg) center/cover fixed no-repeat;
   }
-
-  /* ==== РАСПОЛОЖЕНИЕ (чуть выше центра) ==== */
   .register-page .auth-wrap{
     min-height: calc(100vh - 64px);
     display: flex;
     justify-content: center;
-    align-items: flex-start;   /* вместо center */
-    padding-top: 6rem;         /* регулируй: 5–8rem */
+    align-items: flex-start;   
+    padding-top: 6rem;         
     padding-bottom: 3rem;
   }
-
-  /* ==== КАРТОЧКА ==== */
-  .auth-card{ max-width: 720px; width: 100%; }  /* регистрации чуть шире */
+  .auth-card{ max-width: 720px; width: 100%; } 
   .auth-card .card-body{ padding: 2.75rem 3rem; }
   @media (min-width: 768px){ .auth-card .card-body{ padding: 3.25rem 3.5rem; } }
-
-  /* ==== ТИПОГРАФИКА ==== */
   .auth-title{
     font-weight: 800; letter-spacing:.3px; margin-bottom:.25rem;
     background: linear-gradient(135deg,#e5e7eb 0%, #93c5fd 50%, #c4b5fd 100%);
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
   .auth-subtitle{ color: rgba(226,232,240,.75); margin-bottom: 1.25rem; }
-
-  /* ==== ПОЛЯ ФОРМЫ ==== */
   .auth-card form p{ margin-bottom: 1rem; }
   .auth-card form label{
     display:block; margin-bottom:.35rem; font-weight:600; font-size:.95rem;
@@ -64,8 +52,6 @@
     border-color: rgba(59,130,246,.6);
     box-shadow: 0 0 0 .25rem rgba(59,130,246,.25);
   }
-
-  /* Django helptext (правила пароля) */
   .auth-card .helptext{
     display:block;
     color: rgba(226,232,240,.7);
@@ -78,8 +64,6 @@
   .auth-card .helptext li{
     margin:.25rem 0;
   }
-
-  /* Ошибки */
   .auth-card .errorlist{
     list-style:none; margin:0 0 .75rem; padding:.5rem .75rem;
     border-radius:.5rem;
@@ -87,8 +71,6 @@
     border: 1px solid rgba(239,68,68,.35);
     color:#fecaca; font-size:.925rem;
   }
-
-  /* ==== CTA-кнопка (тот же градиент, что на логине) ==== */
   .btn-neo{
     color:#0b1020; font-weight:700; letter-spacing:.2px;
     border:0; border-radius: .9rem; padding:.9rem 1rem;
@@ -109,17 +91,14 @@
   .auth-meta a:hover{ text-decoration:underline; }
 </style>
 {% endblock %}
-
 {% block content %}
 <div class="auth-wrap">
   <div class="card card-ring auth-card">
     <div class="card-body">
-      <h1 class="auth-title text-center">Регистрация</h1>
-      <p class="auth-subtitle text-center">Создай аккаунт и присоединяйся к турнирам</p>
-
+      <h1 class="auth-title text-center">Sign up</h1>
+      <p class="auth-subtitle text-center">Create an account and join tournaments</p>
       <form method="post" novalidate>
         {% csrf_token %}
-
         <p>
           {{ form.username.label_tag }} 
           {{ form.username }}
@@ -127,7 +106,6 @@
             <ul class="errorlist">{{ form.username.errors }}</ul>
           {% endif %}
         </p>
-
         <p>
           {{ form.email.label_tag }} 
           {{ form.email }}
@@ -135,7 +113,6 @@
             <ul class="errorlist">{{ form.email.errors }}</ul>
           {% endif %}
         </p>
-
         <p>
           {{ form.password1.label_tag }}
           {{ form.password1 }}
@@ -143,7 +120,6 @@
             <ul class="errorlist">{{ form.password1.errors }}</ul>
           {% endif %}
         </p>
-
         <p>
           {{ form.password2.label_tag }}
           {{ form.password2 }}
@@ -151,15 +127,13 @@
             <ul class="errorlist">{{ form.password2.errors }}</ul>
           {% endif %}
         </p>
-
         <div class="d-grid mt-3">
-          <button type="submit" class="btn btn-neo">Зарегистрироваться</button>
+          <button type="submit" class="btn btn-neo">Sign up</button>
         </div>
       </form>
-
       <p class="auth-meta text-center mt-3 mb-0">
-        Уже есть аккаунт?
-        <a href="{% url 'login' %}">Войти</a>
+        Already have an account?
+        <a href="{% url 'login' %}">Log in</a>
       </p>
     </div>
   </div>

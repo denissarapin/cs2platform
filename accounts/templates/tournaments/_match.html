@@ -1,13 +1,6 @@
 {% load static %}
 <div id="match-{{ match.id }}" class="match status-{{ match.status }}">
-    <!-- Команда A -->
-    <div class="team 
-        {% if match.winner_id and match.winner_id == match.team_a_id %}
-            winner
-        {% elif not match.team_a %}
-            waiting
-        {% endif %}
-    ">
+    <div class="team {% if match.winner_id and match.winner_id == match.team_a_id %} winner {% elif not match.team_a %} waiting {% endif %}">
         <span class="name">
             {% if match.team_a %}
                 {% if match.team_a.logo %}
@@ -15,20 +8,12 @@
                 {% endif %}
                 {{ match.team_a.name }}
             {% else %}
-                <em>Ожидание</em>
+                <em>Waiting</em>
             {% endif %}
         </span>
         <span class="score">{{ match.score_a }}</span>
     </div>
-
-    <!-- Команда B -->
-    <div class="team 
-        {% if match.winner_id and match.winner_id == match.team_b_id %}
-            winner
-        {% elif not match.team_b %}
-            waiting
-        {% endif %}
-    ">
+    <div class="team {% if match.winner_id and match.winner_id == match.team_b_id %} winner {% elif not match.team_b %} waiting {% endif %}">
         <span class="name">
             {% if match.team_b %}
                 {% if match.team_b.logo %}
@@ -36,15 +21,14 @@
                 {% endif %}
                 {{ match.team_b.name }}
             {% else %}
-                <em>Ожидание</em>
+                <em>Waiting</em>
             {% endif %}
         </span>
         <span class="score">{{ match.score_b }}</span>
     </div>
-
     <a href="{% url 'tournaments:match_detail' match.tournament.id match.id %}"
     class="match-link"
-    title="Перейти к матчу #{{ match.id }}">
-    <img src="{% static 'tournaments/img/button.png' %}" alt="Перейти" class="match-icon">
+    title="Go to match #{{ match.id }}">
+    <img src="{% static 'tournaments/img/button.png' %}" alt="Go" class="match-icon">
     </a>
 </div>

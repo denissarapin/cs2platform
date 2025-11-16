@@ -1,4 +1,3 @@
-# tournaments/admin.py
 from django.contrib import admin
 from .models import Tournament, TournamentTeam, Match
 
@@ -21,8 +20,8 @@ class TournamentAdmin(admin.ModelAdmin):
 
     def admins_count(self, obj):
         return obj.admins.count()
-    admins_count.short_description = "Админов"
+    admins_count.short_description = "Admins"
 
     def participants_count(self, obj):
         return obj.participants.count()
-    participants_count.short_description = "Команд"
+    participants_count.short_description = "Teams"

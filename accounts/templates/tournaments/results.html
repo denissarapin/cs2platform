@@ -2,114 +2,95 @@
 {% load static %}
 {% block title %}{{ tournament.name }} — Results{% endblock %}
 {% block body_class %}tournaments-page{% endblock %}
-
 {% block content %}
+{% include "tournaments/_hero.html" with active_tab="results" %}
+<section class="ov-card card-dark card-ring ov-results">
+  <div class="ov-card-h">Results</div>
+  <ul class="list-group list-group-flush">
+    {% for m in matches %}
+      <li class="list-group-item res-row d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <span class="round-pill">
+            {% if m.round == 1 %}Quarter finals
+            {% elif m.round == 2 %}Semi finals
+            {% elif m.round == 3 %}Final
+            {% else %}Round {{ m.round }}{% endif %}
+          </span>
 
-  {# общий верх: hero + tabs (активна Results) #}
-  {% include "tournaments/_hero.html" with active_tab="results" %}
-
-  {# ===== НИЖЕ — СОДЕРЖИМОЕ ВКЛАДКИ RESULTS ===== #}
-  <section class="ov-card card-dark card-ring ov-results">
-    <div class="ov-card-h">Результаты</div>
-
-    <ul class="list-group list-group-flush">
-      {% for m in matches %}
-        <li class="list-group-item res-row d-flex align-items-center gap-3">
-
-          <div class="d-flex align-items-center gap-3">
-            {# слева — понятный ярлык раунда #}
-            <span class="round-pill">
-              {% if m.round == 1 %}Quarter finals
-              {% elif m.round == 2 %}Semi finals
-              {% elif m.round == 3 %}Final
-              {% else %}Раунд {{ m.round }}{% endif %}
-            </span>
-
-            {# команда A #}
-            <div class="team-side d-flex align-items-center gap-2">
-              {% if m.team_a and m.team_a.logo %}
-                <img src="{{ m.team_a.logo.url }}" alt="{{ m.team_a.name }}" class="team-logo">
-              {% endif %}
-              <div class="name {% if m.winner_id and m.winner_id == m.team_a_id %}winner{% endif %}">
-                {% if m.team_a %}[{{ m.team_a.tag }}] {{ m.team_a.name }}{% else %}<em>—</em>{% endif %}
-                {% if m.winner_id and m.winner_id == m.team_a_id %}<span class="chip chip-success chip-xs">Winner</span>{% endif %}
-              </div>
-            </div>
-
-            <div class="score-box fw-900">
-              {{ m.score_a }} <span class="sep">:</span> {{ m.score_b }}
-            </div>
-
-            {# команда B #}
-            <div class="team-side d-flex align-items-center gap-2">
-              {% if m.team_b and m.team_b.logo %}
-                <img src="{{ m.team_b.logo.url }}" alt="{{ m.team_b.name }}" class="team-logo">
-              {% endif %}
-              <div class="name {% if m.winner_id and m.winner_id == m.team_b_id %}winner{% endif %}">
-                {% if m.team_b %}[{{ m.team_b.tag }}] {{ m.team_b.name }}{% else %}<em>—</em>{% endif %}
-                {% if m.winner_id and m.winner_id == m.team_b_id %}<span class="chip chip-success chip-xs">Winner</span>{% endif %}
-              </div>
+          <div class="team-side d-flex align-items-center gap-2">
+            {% if m.team_a and m.team_a.logo %}
+              <img src="{{ m.team_a.logo.url }}" alt="{{ m.team_a.name }}" class="team-logo">
+            {% endif %}
+            <div class="name {% if m.winner_id and m.winner_id == m.team_a_id %}winner{% endif %}">
+              {% if m.team_a %}[{{ m.team_a.tag }}] {{ m.team_a.name }}{% else %}<em>—</em>{% endif %}
+              {% if m.winner_id and m.winner_id == m.team_a_id %}<span class="chip chip-success chip-xs">Winner</span>{% endif %}
             </div>
           </div>
+          <div class="score-box fw-900">
+            {{ m.score_a }} <span class="sep">:</span> {{ m.score_b }}
+          </div>
+          <div class="team-side d-flex align-items-center gap-2">
+            {% if m.team_b and m.team_b.logo %}
+              <img src="{{ m.team_b.logo.url }}" alt="{{ m.team_b.name }}" class="team-logo">
+            {% endif %}
+            <div class="name {% if m.winner_id and m.winner_id == m.team_b_id %}winner{% endif %}">
+              {% if m.team_b %}[{{ m.team_b.tag }}] {{ m.team_b.name }}{% else %}<em>—</em>{% endif %}
+              {% if m.winner_id and m.winner_id == m.team_b_id %}<span class="chip chip-success chip-xs">Winner</span>{% endif %}
+            </div>
+          </div>
+        </div>
+        <a href="{% url 'tournaments:match_detail' tournament.pk m.pk %}"
+            class="stretched-link" aria-label="Open match"></a>
+      </li>
+    {% empty %}
+      <li class="list-group-item text-muted">No finished matches</li>
+    {% endfor %}
+  </ul>
+</section>
+<style>
+  .ov-results .list-group-item{
+    position: relative;
+    background: rgba(255,255,255,.02) !important;
+    border-color: rgba(148,163,184,.12) !important;
+    padding: 12px 14px;
+    color:#e6eeff !important;
+    overflow:hidden;
+  }
+  .ov-results .list-group-item .stretched-link{ position:absolute; inset:0; }
+  .ov-results .list-group-item + .list-group-item{
+    border-top-color: rgba(148,163,184,.10) !important;
+  }
+  .ov-results .list-group-item:hover{
+    background: rgba(255,255,255,.03) !important;
+    border-color: rgba(148,163,184,.18) !important;
+  }
+  .round-pill{
+    display:inline-block;
+    padding:.25rem .6rem;
+    border-radius:999px;
+    background: rgba(255,255,255,.06);
+    border:1px solid rgba(148,163,184,.22);
+    color:#e6eeff;
+    font-weight:800;
+    box-shadow: 0 6px 16px rgba(2,6,23,.35);
+    white-space:nowrap;
+  }
+  .team-logo{
+    width:32px; height:32px; object-fit:cover; border-radius:8px;
+    box-shadow:0 6px 16px rgba(2,6,23,.4);
+  }
+  .name{ color:#f5f8ff; }
+  .name.winner{ color:#d1ffe1; font-weight:900; }
+  .score-box{
+    padding:6px 10px; border-radius:10px;
+    background: rgba(255,255,255,.06);
+    border:1px solid rgba(148,163,184,.18);
+    box-shadow: inset 0 0 0 1px rgba(148,163,184,.06);
+    letter-spacing:.5px;
+  }
+  .score-box .sep{ opacity:.75; padding:0 4px; }
 
-          {# растягиваем ссылку на всю строку #}
-          <a href="{% url 'tournaments:match_detail' tournament.pk m.pk %}"
-             class="stretched-link" aria-label="Открыть матч"></a>
-        </li>
-      {% empty %}
-        <li class="list-group-item text-muted">Завершённых матчей нет</li>
-      {% endfor %}
-    </ul>
-  </section>
-
-  <style>
-    .ov-results .list-group-item{
-      position: relative; /* для stretched-link */
-      background: rgba(255,255,255,.02) !important;
-      border-color: rgba(148,163,184,.12) !important;
-      padding: 12px 14px;
-      color:#e6eeff !important;
-      overflow:hidden;
-    }
-    .ov-results .list-group-item .stretched-link{ position:absolute; inset:0; }
-    .ov-results .list-group-item + .list-group-item{
-      border-top-color: rgba(148,163,184,.10) !important;
-    }
-    .ov-results .list-group-item:hover{
-      background: rgba(255,255,255,.03) !important;
-      border-color: rgba(148,163,184,.18) !important;
-    }
-
-    .round-pill{
-      display:inline-block;
-      padding:.25rem .6rem;
-      border-radius:999px;
-      background: rgba(255,255,255,.06);
-      border:1px solid rgba(148,163,184,.22);
-      color:#e6eeff;
-      font-weight:800;
-      box-shadow: 0 6px 16px rgba(2,6,23,.35);
-      white-space:nowrap;
-    }
-
-    .team-logo{
-      width:32px; height:32px; object-fit:cover; border-radius:8px;
-      box-shadow:0 6px 16px rgba(2,6,23,.4);
-    }
-    .name{ color:#f5f8ff; }
-    .name.winner{ color:#d1ffe1; font-weight:900; }
-
-    .score-box{
-      padding:6px 10px; border-radius:10px;
-      background: rgba(255,255,255,.06);
-      border:1px solid rgba(148,163,184,.18);
-      box-shadow: inset 0 0 0 1px rgba(148,163,184,.06);
-      letter-spacing:.5px;
-    }
-    .score-box .sep{ opacity:.75; padding:0 4px; }
-
-    .chip-xs{ font-size:.72rem; padding:.12rem .35rem; margin-left:.4rem; }
-  </style>
-
-  {% include "tournaments/_join_modal.html" %}
+  .chip-xs{ font-size:.72rem; padding:.12rem .35rem; margin-left:.4rem; }
+</style>
+{% include "tournaments/_join_modal.html" %}
 {% endblock %}

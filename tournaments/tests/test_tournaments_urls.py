@@ -1,7 +1,6 @@
 import pytest
 from django.urls import reverse, resolve
 
-# список (имя, kwargs) — только проверяем, что reverse работает
 ROUTES = [
     ("tournaments:list",            {}),
     ("tournaments:create",          {}),
@@ -25,8 +24,7 @@ ROUTES = [
 
 @pytest.mark.parametrize("name,kwargs", ROUTES)
 def test_named_routes_reverse_ok(name, kwargs):
-    url = reverse(name, kwargs=kwargs)  # не должно падать
+    url = reverse(name, kwargs=kwargs)  
     match = resolve(url)
-    # Достаточно проверить, что наш namespace/имя совпадает
     assert match.namespace == "tournaments"
     assert match.url_name == name.split(":")[1]

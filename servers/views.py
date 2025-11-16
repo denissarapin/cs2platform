@@ -3,12 +3,11 @@ from django.templatetags.static import static
 
 MAPS = ["de_mirage", "de_dust2", "de_ancient", "de_overpass", "de_train", "de_inferno", "de_nuke"]
 
-# code, title, color-key, capacity
 MODES = [
     ("dm",       "DM",        "brand",   16),
     ("1v1",      "1 vs 1",    "muted",    2),
     ("retake",   "Retake",    "warn",    10),
-    ("hsdm",     "HSDM",      "danger",  16),   # ← фикс опечатки
+    ("hsdm",     "HSDM",      "danger",  16),   
     ("pistoldm", "Pistol DM", "success", 16),
     ("surf",     "Surf",      "muted",   32),
     ("bhop",     "Bhop",      "success", 24),
@@ -18,15 +17,12 @@ MODES = [
 ]
 
 def _mode_dict():
-    """удобный доступ по коду"""
     return {code: {"code": code, "title": title, "color": color, "capacity": cap}
             for code, title, color, cap in MODES}
 
 def _servers_for(mode_code):
-    """7 заглушек серверов (по одной карте), с картинкой, IP и счётчиком игроков"""
     m = _mode_dict()[mode_code]
     cap = m["capacity"]
-
     servers = []
     base_port = 27015
     for i, map_name in enumerate(MAPS, start=1):

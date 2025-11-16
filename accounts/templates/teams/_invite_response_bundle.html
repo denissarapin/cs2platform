@@ -1,8 +1,4 @@
-{# templates/teams/_invite_response_bundle.html #}
-
-{# 1) перерисовываем результаты поиска в качестве основного target #}
 {% include "teams/_user_search_results.html" %}
-{# 2) out-of-band: перерисуем блок исходящих инвайтов #}
 <div id="outgoingInvites" hx-swap-oob="true">
   {% include "teams/_invites_outgoing.html" with team=team outgoing=outgoing %}
 </div>

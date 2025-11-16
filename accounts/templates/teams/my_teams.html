@@ -1,23 +1,18 @@
-{# templates/teams/my_teams.html #}
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Мои команды{% endblock %}
+{% block title %}My teams{% endblock %}
 {% block body_class %}teams-page{% endblock %}
 {% block content %}
-
 <div class="d-flex justify-content-between align-items-center mb-4">
-  <h2 class="mb-0">Мои команды</h2>
-  <a href="{% url 'teams:team_create' %}" class="btn btn-success">Создать команду</a>
+  <h2 class="mb-0">My teams</h2>
+  <a href="{% url 'teams:team_create' %}" class="btn btn-success">Create a team</a>
 </div>
-
 {% if memberships %}
   <div class="team-grid">
     {% for m in memberships %}
       <a href="{% url 'teams:team_detail' slug=m.team.slug %}" class="team-card-link">
         <div class="team-card">
-          <!-- LEFT + CENTER -->
           <div class="team-main">
-            <!-- Круглый логотип / заглушка -->
             <div class="team-logo-round">
               {% if m.team.logo %}
                 <img src="{{ m.team.logo.url }}" alt="">
@@ -28,30 +23,24 @@
                 </svg>
               {% endif %}
             </div>
-
-            <!-- Текстовая часть -->
             <div class="team-text">
               <div class="team-title">
                 [{{ m.team.tag }}] {{ m.team.name }}
                 {% if m.role == 'captain' %}
-                  <i class="bi bi-award-fill crown" title="Вы — капитан"></i>
+                  <i class="bi bi-award-fill crown" title="You are the captain"></i>
                 {% endif %}
               </div>
-
               <div class="team-meta">
-                Игроков: {{ m.team.memberships.count }}/5 •
-                Роль: {{ m.get_role_display }} •
-                Создана: {{ m.team.created_at|date:"d.m" }}
+                Players: {{ m.team.memberships.count }}/5 •
+                Role: {{ m.get_role_display }} •
+                Created: {{ m.team.created_at|date:"d.m" }}
               </div>
-
-              <!-- Стек аватарок -->
               <div class="member-stack mt-1">
                 <div class="m-avatars">
                   {% for tm in m.team.memberships.all|slice:":4" %}
                     {% if tm.user.avatar %}
                       <img class="m-avatar" src="{{ tm.user.avatar.url }}" alt="{{ tm.user.username }}">
                     {% else %}
-                      {# 🔹 ФОЛБЭК: заглушка #}
                       <img class="m-avatar" src="{% static 'img/avatars/ph_user.png' %}" alt="{{ tm.user.username }}">
                     {% endif %}
                   {% endfor %}
@@ -64,14 +53,12 @@
               </div>
             </div>
           </div>
-
-          <!-- RIGHT: бейджи -->
           <div class="d-flex align-items-center gap-2">
             {% if m.role == 'captain' %}
               <span class="badge-chip captain">Captain</span>
             {% endif %}
             {% if m.pending_invites %}
-              <span class="badge-chip invites">Инвайтов: {{ m.pending_invites }}</span>
+              <span class="badge-chip invites">Invites: {{ m.pending_invites }}</span>
             {% endif %}
           </div>
         </div>
@@ -79,6 +66,6 @@
     {% endfor %}
   </div>
 {% else %}
-  <div class="alert alert-info">Вы ещё не состоите ни в одной команде.</div>
+  <div class="alert alert-info">You are not a member of any team yet.</div>
 {% endif %}
 {% endblock %}

@@ -2,110 +2,89 @@
 {% load static %}
 {% block title %}{{ tournament.name }} — Teams{% endblock %}
 {% block body_class %}tournaments-page{% endblock %}
-
 {% block content %}
-
-  {# общий верх: hero + tabs (активна Teams) #}
-  {% include "tournaments/_hero.html" with active_tab="teams" %}
-
-  {# ===== НИЖЕ — СОДЕРЖИМОЕ ВКЛАДКИ TEAMS ===== #}
-  <section class="ov-card card-dark card-ring ov-teams">
-    <div class="ov-card-h">Команды</div>
-
-    <ul class="list-group list-group-flush">
-      {% for p in participants %}
-        {% with tm=p.team %}
-        <li class="list-group-item team-row d-flex align-items-center justify-content-between gap-3">
-          <div class="d-flex align-items-center gap-3">
-            <div class="idx">{{ forloop.counter }}</div>
-
-            {% if tm and tm.logo %}
-              <img src="{{ tm.logo.url }}" alt="{{ tm.name }}"
-                   class="rounded team-logo">
-            {% endif %}
-
-            <div class="d-flex flex-column">
-              <div class="team-name fw-800">
-                [{% if tm %}{{ tm.tag }}{% else %}?{% endif %}]
-                {% if tm %}{{ tm.name }}{% else %}—{% endif %}
-              </div>
-
-              {% if tm and tm.captain %}
-                <div class="team-capt text-muted">Капитан: {{ tm.captain.username }}</div>
-              {% endif %}
+{% include "tournaments/_hero.html" with active_tab="teams" %}
+<section class="ov-card card-dark card-ring ov-teams">
+  <div class="ov-card-h">Teams</div>
+  <ul class="list-group list-group-flush">
+    {% for p in participants %}
+      {% with tm=p.team %}
+      <li class="list-group-item team-row d-flex align-items-center justify-content-between gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div class="idx">{{ forloop.counter }}</div>
+          {% if tm and tm.logo %}
+            <img src="{{ tm.logo.url }}" alt="{{ tm.name }}"
+                  class="rounded team-logo">
+          {% endif %}
+          <div class="d-flex flex-column">
+            <div class="team-name fw-800">
+              [{% if tm %}{{ tm.tag }}{% else %}?{% endif %}]
+              {% if tm %}{{ tm.name }}{% else %}—{% endif %}
             </div>
+            {% if tm and tm.captain %}
+              <div class="team-capt text-muted">Captain: {{ tm.captain.username }}</div>
+            {% endif %}
           </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="chip chip-glass">Participant</span>
+        </div>
+      </li>
+      {% endwith %}
+    {% empty %}
+      <li class="list-group-item text-muted">No teams</li>
+    {% endfor %}
+  </ul>
+</section>
 
-          <div class="d-flex align-items-center gap-2">
-            <span class="chip chip-glass">Участник</span>
-            {# при желании здесь потом появится ссылка на профиль команды #}
-          </div>
-        </li>
-        {% endwith %}
-      {% empty %}
-        <li class="list-group-item text-muted">Нет команд</li>
-      {% endfor %}
-    </ul>
-  </section>
+<style>
+  .ov-teams .list-group-item{
+    background: rgba(255,255,255,.02) !important;
+    border-color: rgba(148,163,184,.12) !important;
+    padding: 12px 14px;
+    color: #e6eeff !important;
+  }
+  .ov-teams .list-group-item + .list-group-item{
+    border-top-color: rgba(148,163,184,.10) !important;
+  }
+  .ov-teams .list-group-item a{
+    color: #e6eeff !important;
+    text-decoration: none;
+  }
+  .ov-teams .list-group-item a:hover{
+    text-decoration: underline;
+  }
+  .ov-teams .text-muted{
+    color: rgba(207,224,255,.72) !important;
+  }
+  .ov-teams .idx{
+    width: 34px; height: 34px;
+    display: grid; place-items: center;
+    border-radius: 10px;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.18);
+    font-weight: 800; color: #e6eeff;
+  }
+  .ov-teams .team-logo{
+    width: 36px; height: 36px; object-fit: cover; border-radius: 8px;
+    box-shadow: 0 6px 16px rgba(2,6,23,.4);
+  }
+  .ov-teams .team-fallback{
+    width: 36px; height: 36px;
+    display: grid; place-items: center;
+    border-radius: 8px;
+    background: linear-gradient(180deg, rgba(16,23,38,.9), rgba(10,16,28,.9));
+    border: 1px solid rgba(148,163,184,.22);
+    font-weight: 900; color: #e6eeff;
+    box-shadow: 0 6px 16px rgba(2,6,23,.4);
+  }
+  .ov-teams .team-name{ color:#f5f8ff; }
+  .ov-teams .team-capt{ margin-top:2px; }
+  .ov-teams .team-row:hover{
+    background: rgba(255,255,255,.03) !important;
+    border-color: rgba(148,163,184,.18) !important;
+  }
+</style>
 
-  <style>
-    /* Стеклянная карточка списка */
-    .ov-teams .list-group-item{
-      background: rgba(255,255,255,.02) !important;
-      border-color: rgba(148,163,184,.12) !important;
-      padding: 12px 14px;
-      color: #e6eeff !important; /* белый текст */
-    }
-    .ov-teams .list-group-item + .list-group-item{
-      border-top-color: rgba(148,163,184,.10) !important;
-    }
-    .ov-teams .list-group-item a{
-      color: #e6eeff !important;    /* белые ссылки */
-      text-decoration: none;
-    }
-    .ov-teams .list-group-item a:hover{
-      text-decoration: underline;
-    }
-    .ov-teams .text-muted{
-      color: rgba(207,224,255,.72) !important; /* мягкий белый */
-    }
-
-    /* Индекс слева */
-    .ov-teams .idx{
-      width: 34px; height: 34px;
-      display: grid; place-items: center;
-      border-radius: 10px;
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.18);
-      font-weight: 800; color: #e6eeff;
-    }
-
-    /* Логотип / заглушка */
-    .ov-teams .team-logo{
-      width: 36px; height: 36px; object-fit: cover; border-radius: 8px;
-      box-shadow: 0 6px 16px rgba(2,6,23,.4);
-    }
-    .ov-teams .team-fallback{
-      width: 36px; height: 36px;
-      display: grid; place-items: center;
-      border-radius: 8px;
-      background: linear-gradient(180deg, rgba(16,23,38,.9), rgba(10,16,28,.9));
-      border: 1px solid rgba(148,163,184,.22);
-      font-weight: 900; color: #e6eeff;
-      box-shadow: 0 6px 16px rgba(2,6,23,.4);
-    }
-
-    .ov-teams .team-name{ color:#f5f8ff; }
-    .ov-teams .team-capt{ margin-top:2px; }
-
-    /* Подсветка строки */
-    .ov-teams .team-row:hover{
-      background: rgba(255,255,255,.03) !important;
-      border-color: rgba(148,163,184,.18) !important;
-    }
-  </style>
-
-  {# модалка Join (общая для всех вкладок) #}
-  {% include "tournaments/_join_modal.html" %}
-
+{% include "tournaments/_join_modal.html" %}
 {% endblock %}

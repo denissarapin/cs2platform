@@ -153,3 +153,54 @@ a:hover { color: #ffffff !important; opacity: .95; }
 @media (hover:hover){
   .navbar .auth-btn:hover{ transform: translateY(var(--y)); }
 }
+
+@media (max-width: 576px){
+  .container, .container-fluid { padding-left: 12px; padding-right: 12px; }
+}
+
+/* Уплотним нав-линки и скроем подписи, оставив иконки на сверхузких экранах */
+@media (max-width: 420px){
+  .navbar-nav .nav-link { padding-top: .5rem; padding-bottom: .5rem; }
+  .nav-label { display: none; } /* оставить только иконки */
+}
+
+/* Уведомления: делаем dropdown полноширинным, чтобы влезал контент */
+@media (max-width: 576px){
+  .notif-menu{
+    width: 100vw;
+    max-width: 100vw;
+    left: 0 !important;
+    right: 0 !important;
+    border-radius: 0;          /* прилегает к краям */
+  }
+}
+
+/* Карточки: меньше тени/радиуса и отступов на мобилках */
+@media (max-width: 576px){
+  .card{
+    border-radius: 12px;
+    box-shadow: 0 8px 22px rgba(2,6,23,.35);
+  }
+}
+
+/* Таблицы/списки турниров: избегаем горизонтального скролла, переносим длинные названия */
+.tournament-title,
+.card .title,
+h1,h2,h3,h4,h5,h6{
+  overflow-wrap: anywhere;
+}
+
+/* Если у тебя гриды/каталоги — в одну колонку на телефонах */
+@media (max-width: 576px){
+  .grid-2, .grid-3, .grid-4{ display: grid; grid-template-columns: 1fr; gap: 12px; }
+}
+
+/* Фон: отключили fixed выше 768px — для мобильных это ок; немного приглушим */
+@media (max-width: 576px){
+  body::before{ filter: brightness(.88) saturate(110%); }
+}
+
+/* Кнопки входа в шапке — на всю ширину в свёрнутом меню */
+@media (max-width: 992px){
+  .navbar .auth-btn.w-100 { display: inline-block; }
+}

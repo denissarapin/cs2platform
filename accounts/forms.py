@@ -8,11 +8,10 @@ class SignUpForm(UserCreationForm):
     class Meta:
         model = User
         fields = ("username", "email", "password1", "password2")
-        help_texts = {f: "" for f in fields}  # убираем help_text в мета
+        help_texts = {f: "" for f in fields}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # на всякий случай глушим ещё раз
         for f in ("username", "password1", "password2"):
             self.fields[f].help_text = ""
 
@@ -21,19 +20,18 @@ class CustomUserCreationForm(UserCreationForm):
         model = User
         fields = ("username", "email", "password1", "password2")
 
-
 class ProfileEditForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ["username", "email", "avatar", "steam_id"]
         widgets = {
-            "username": forms.TextInput(attrs={"class": "form-control", "placeholder": "Введите имя пользователя"}),
-            "email": forms.EmailInput(attrs={"class": "form-control", "placeholder": "Введите email"}),
+            "username": forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter username"}),
+            "email": forms.EmailInput(attrs={"class": "form-control", "placeholder": "Enter email"}),
             "avatar": forms.FileInput(attrs={"class": "form-control"}),
-            "steam_id": forms.TextInput(attrs={"class": "form-control", "placeholder": "Введите Steam ID"}),
+            "steam_id": forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter Steam ID"}),
         }
         labels = {
-            "username": "Имя пользователя",
+            "username": "Username",
             "email": "Email",
             "avatar": "Аватар",
             "steam_id": "Steam ID",
@@ -56,12 +54,11 @@ class SteamLookupForm(forms.Form):
             "inputmode": "numeric",
             "autocomplete": "off",
         }),
-        help_text="Можно ввести SteamID64 вручную (приоритетнее подключённого Steam).",
+        help_text="You can manually enter a SteamID64 (it takes priority over connected Steam)",
     )
 
     def clean_steam_id(self):
         v = (self.cleaned_data.get("steam_id") or "").strip()
-        # Жёстко не валидируем: резолвинг делаем во view через Steam API.
         if " " in v:
-            raise forms.ValidationError("Ввод без пробелов. Вставь SteamID64, ссылку или alias.")
+            raise forms.ValidationError("No spaces allowed. Enter SteamID64, link, or alias")
         return v

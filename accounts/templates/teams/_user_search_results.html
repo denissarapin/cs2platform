@@ -1,27 +1,16 @@
-{# Этот файл рендерится ВНУТРИ <div id="memberMenu" class="dropdown-menu"> #}
 {% if candidates %}
   <div class="list-group list-group-flush">
     {% for u in candidates %}
       <div class="dropdown-item px-2 py-2" data-candidate-item>
         <div class="d-flex align-items-center justify-content-between gap-3">
           <div class="text-truncate">{{ u.username }}</div>
-          <form
-            hx-post="{% url 'teams:send_invite' team.slug %}"
-            hx-target="#memberMenu"
-            hx-swap="innerHTML"
-            hx-vals='js:{ user_id: {{ u.id }}, q: document.getElementById("memberSearch").value }'
-            hx-on::after-request="
-              document.getElementById('memberMenu').classList.remove('show');
-              document.getElementById('memberSearch').value='';
-            "
-            class="d-inline"
-          >
-            <button type="submit" class="btn btn-outline-light btn-sm">Пригласить</button>
+          <form hx-post="{% url 'teams:send_invite' team.slug %}" hx-target="#memberMenu" hx-swap="innerHTML" hx-vals='js:{ user_id: {{ u.id }}, q: document.getElementById("memberSearch").value }' hx-on::after-request=" document.getElementById('memberMenu').classList.remove('show'); document.getElementById('memberSearch').value='';" class="d-inline">
+            <button type="submit" class="btn btn-outline-light btn-sm">Invite</button>
           </form>
         </div>
       </div>
     {% endfor %}
   </div>
 {% else %}
-  <div class="p-2 text-white-50 small">Никого не найдено.</div>
+  <div class="p-2 text-white-50 small">No one found.</div>
 {% endif %}

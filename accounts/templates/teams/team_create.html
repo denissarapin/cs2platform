@@ -1,14 +1,10 @@
-{# templates/teams/team_create.html #}
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Создать команду{% endblock %}
-
+{% block title %}Create a team{% endblock %}
 {% block body_class %}team-create-page{% endblock %}
-
 {% block extra_css %}
 {{ block.super }}
 <style>
-  /* Фон — как на логине/турнирах */
   body.team-create-page:before{
     min-height:100vh;
     --teams-bg: url("{% static 'img/bg/teams_bg.jpg' %}");
@@ -17,28 +13,20 @@
       linear-gradient(180deg, rgba(22,29,47,.24), rgba(13,20,35,.24)),
       var(--teams-bg) center/cover fixed no-repeat;
   }
-
-  /* Поднимаем карточку выше центра */
   .form-wrap{
     min-height: calc(100vh - 64px);
     display:flex; justify-content:center; align-items:flex-start;
     padding: 6rem 1rem 3rem;
   }
-
-  /* Карточка */
   .form-card{ max-width: 720px; width:100%; }
   .form-card .card-body{ padding: 2.75rem 3rem; }
   @media (min-width:768px){ .form-card .card-body{ padding: 3.25rem 3.5rem; } }
-
-  /* Заголовки */
   .form-title{
     font-weight:800; letter-spacing:.3px; margin-bottom:.25rem;
     background: linear-gradient(135deg,#e5e7eb 0%, #93c5fd 50%, #c4b5fd 100%);
     -webkit-background-clip:text; background-clip:text; color:transparent;
   }
   .form-sub{ color: rgba(226,232,240,.75); margin-bottom:1.25rem; }
-
-  /* Поля */
   .form-card form p{ margin-bottom: 1rem; }
   .form-card form label{
     display:block; margin-bottom:.35rem; font-weight:600; font-size:.95rem;
@@ -63,8 +51,6 @@
     border-color: rgba(59,130,246,.6);
     box-shadow: 0 0 0 .25rem rgba(59,130,246,.25);
   }
-
-  /* Дропзона для логотипа */
   .dz{ position:relative; border-radius:.9rem; }
   .dz input[type="file"]{
     position:absolute; inset:0; opacity:0; cursor:pointer; z-index:2;
@@ -82,15 +68,11 @@
   .dz-ui b{ color:#e5e7eb; }
   .dz-note{ color: rgba(226,232,240,.65); font-size:.9rem; }
   .dz-filename{ color: rgba(226,232,240,.8); font-size:.9rem; }
-
-  /* Ошибки */
   .form-card .errorlist{
     list-style:none; margin:.25rem 0 .75rem; padding:.5rem .75rem;
     border-radius:.5rem; background: rgba(239,68,68,.1);
     border:1px solid rgba(239,68,68,.35); color:#fecaca; font-size:.925rem;
   }
-
-  /* CTA кнопка */
   .btn-neo{
     color:#0b1020; font-weight:700; letter-spacing:.2px;
     border:0; border-radius:.9rem; padding:.9rem 1rem;
@@ -106,47 +88,38 @@
   }
 </style>
 {% endblock %}
-
 {% block content %}
 <div class="form-wrap">
   <div class="card card-ring form-card">
     <div class="card-body">
-      <h1 class="form-title">Создать команду</h1>
-      <p class="form-sub">Придумай название, тег и загрузи логотип</p>
-
+      <h1 class="form-title">Create a team</h1>
+      <p class="form-sub">Choose a name, tag, and upload a logo</p>
       <form method="post" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
-
-        {# Имя #}
         <p>
           {{ form.name.label_tag }}
           {{ form.name }}
           {% if form.name.errors %}<ul class="errorlist">{{ form.name.errors }}</ul>{% endif %}
         </p>
-
-        {# Тег #}
         <p>
           {{ form.tag.label_tag }}
           {{ form.tag }}
           {% if form.tag.errors %}<ul class="errorlist">{{ form.tag.errors }}</ul>{% endif %}
         </p>
-
-        {# Логотип — дропзона #}
         <p>
           {{ form.logo.label_tag }}
           <div class="dz">
             {{ form.logo }}
             <div class="dz-ui">
-              <b>Перетащите сюда или выберите файл</b>
-              <span class="dz-note">PNG/JPG, до ~10MB. Лучше квадратное изображение.</span>
-              <span class="dz-filename" id="dz-filename">Файл не выбран</span>
+              <b>Drag and drop here or choose a file</b>
+              <span class="dz-note">PNG/JPG, up to ~10MB. A square image is best.</span>
+              <span class="dz-filename" id="dz-filename">No file selected</span>
             </div>
           </div>
           {% if form.logo.errors %}<ul class="errorlist">{{ form.logo.errors }}</ul>{% endif %}
         </p>
-
         <div class="d-grid mt-3">
-          <button class="btn-neo" type="submit">Создать</button>
+          <button class="btn-neo" type="submit">Create</button>
         </div>
       </form>
     </div>
@@ -154,14 +127,13 @@
 </div>
 
 <script>
-  // обновляем название выбранного файла
   (function(){
     const input = document.querySelector('.dz input[type="file"]');
     const out = document.getElementById('dz-filename');
     if(input && out){
       input.addEventListener('change', () => {
         const f = input.files && input.files[0];
-        out.textContent = f ? f.name : 'Файл не выбран';
+        out.textContent = f ? f.name : 'No file selected';
       });
     }
   })();

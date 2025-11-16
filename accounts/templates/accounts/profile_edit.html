@@ -1,15 +1,13 @@
 {% extends "base.html" %}
-{% block title %}Редактировать профиль — CS2 Platform{% endblock %}
+{% block title %}Edit Profile — CS2 Platform{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-center mt-5">
   <div class="card shadow-sm p-4" style="max-width: 450px; width: 100%;">
-    <h4 class="text-center mb-4">Редактировать профиль</h4>
+    <h4 class="text-center mb-4">Edit Profile</h4>
 
     <form method="post" enctype="multipart/form-data">
       {% csrf_token %}
-
-      <!-- 👤 Текущий аватар -->
       <div class="text-center mb-3">
         {% if user.avatar %}
           <img src="{{ user.avatar.url }}" class="rounded-circle mb-2" width="96" height="96" alt="avatar" id="avatarPreview">
@@ -18,47 +16,41 @@
         {% endif %}
       </div>
 
-      <!-- Имя пользователя -->
       <div class="mb-3">
         {{ form.username.label_tag }}
         {{ form.username }}
       </div>
 
-      <!-- Email -->
       <div class="mb-3">
         {{ form.email.label_tag }}
         {{ form.email }}
       </div>
 
-      <!-- 📸 Красивая кнопка загрузки аватара -->
       <div class="mb-3">
-        <label class="form-label d-block mb-2">Загрузить новый аватар</label>
+        <label class="form-label d-block mb-2">Upload new avatar</label>
         <label for="avatarInput" class="btn btn-outline-primary">
-          <i class="bi bi-upload"></i> Выбрать файл
+          <i class="bi bi-upload"></i> Choose file
         </label>
         {{ form.avatar }}
       </div>
 
-      <!-- Steam ID -->
       <div class="mb-3">
         {{ form.steam_id.label_tag }}
         {{ form.steam_id }}
       </div>
 
       <button type="submit" class="btn btn-success w-100 mt-3">
-        💾 Сохранить
+        Save
       </button>
-      <a href="{% url 'profile' %}" class="btn btn-outline-secondary w-100 mt-2">Отмена</a>
+      <a href="{% url 'profile' %}" class="btn btn-outline-secondary w-100 mt-2">Cancel</a>
     </form>
   </div>
 </div>
 
-<!-- ✅ JS для предпросмотра аватара -->
 <script>
 const fileInput = document.querySelector('input[type="file"]');
 fileInput.id = "avatarInput";
-fileInput.style.display = "none"; // прячем стандартное поле
-
+fileInput.style.display = "none"; 
 fileInput.addEventListener('change', function(e) {
   const file = e.target.files[0];
   if (file) {

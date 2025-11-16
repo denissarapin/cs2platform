@@ -1,50 +1,38 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Вход{% endblock %}
-
-{# 👉 отдельный класс для фона этой страницы #}
+{% block title %}Login{% endblock %}
 {% block body_class %}login-page{% endblock %}
 
 {% block extra_css %}
 {{ block.super }}
 <style>
-  /* ==== ФОН СТРАНИЦЫ ВХОДА ==== */
   body.login-page::before{
     min-height: 100vh;
-    /* замени путь на свой */
     --login-bg: url("{% static 'img/bg/login.jpg' %}");
     background:
       radial-gradient(1200px 260px at 95% -40%, rgba(245,158,11,.25) 0, rgba(245,158,11,0) 65%),
       linear-gradient(180deg, rgba(22,29,47,.20), rgba(13,20,35,.20)),
       var(--login-bg) center/cover fixed no-repeat;
   }
-
-  /* ==== ВЫРАВНИВАНИЕ ОБЛАСТИ АВТОРИЗАЦИИ ==== */
   .auth-wrap{
     min-height: calc(100vh - 64px);
     display: flex;
     justify-content: center;
-    align-items: flex-start;     /* прижимаем к верху */
-    padding-top: 6rem;           /* регулируй отступ сверху */
+    align-items: flex-start;     
+    padding-top: 6rem;         
     padding-bottom: 3rem;
   }
-
-  /* ==== КАРТОЧКА (стекло + кольцо) ==== */
   .auth-card{
     max-width: 640px; width: 100%;
   }
   .auth-card .card-body{ padding: 2rem 2rem; }
   @media (min-width: 768px){ .auth-card .card-body{ padding: 2.5rem 3rem; } }
-
-  /* ==== ТИПОГРАФИКА ==== */
   .auth-title{
     font-weight: 800; letter-spacing:.3px; margin-bottom:.25rem;
     background: linear-gradient(135deg,#e5e7eb 0%, #93c5fd 50%, #c4b5fd 100%);
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
   .auth-subtitle{ color: rgba(226,232,240,.75); margin-bottom: 1.25rem; }
-
-  /* ==== ПОЛЯ ФОРМЫ (работает даже с form.as_p) ==== */
   .auth-card form p{ margin-bottom: 1rem; }
   .auth-card form label{
     display:block; margin-bottom:.35rem; font-weight:600; font-size:.95rem;
@@ -67,8 +55,6 @@
     border-color: rgba(59,130,246,.6);
     box-shadow: 0 0 0 .25rem rgba(59,130,246,.25);
   }
-
-  /* ошибки Django */
   .auth-card .errorlist{
     list-style:none; margin:0 0 .75rem; padding:.5rem .75rem;
     border-radius:.5rem;
@@ -76,8 +62,6 @@
     border: 1px solid rgba(239,68,68,.35);
     color:#fecaca; font-size:.925rem;
   }
-
-  /* ==== КНОПКА CTA (неоновый градиент) ==== */
   .btn-neo{
     color:#0b1020; font-weight:700; letter-spacing:.2px;
     border:0; border-radius: .9rem; padding:.75rem 1rem;
@@ -93,8 +77,6 @@
     box-shadow: 0 16px 36px rgba(59,130,246,.45);
   }
   .btn-neo:focus-visible{ outline:none; box-shadow: 0 0 0 3px rgba(59,130,246,.45), 0 18px 40px rgba(59,130,246,.45); }
-
-  /* мелочи */
   .auth-meta{ color: rgba(226,232,240,.6); }
   .auth-meta a{ color:#93c5fd; text-decoration:none; }
   .auth-meta a:hover{ text-decoration:underline; }
@@ -105,8 +87,8 @@
 <div class="auth-wrap">
   <div class="card card-ring auth-card">
     <div class="card-body">
-      <h1 class="auth-title text-center">Вход</h1>
-      <p class="auth-subtitle text-center">Добро пожаловать обратно</p>
+      <h1 class="auth-title text-center">Log in</h1>
+      <p class="auth-subtitle text-center">Welcome back</p>
 
       <form method="post" novalidate>
         {% csrf_token %}
@@ -116,13 +98,13 @@
         {{ form.as_p }}
 
         <div class="d-grid mt-3">
-          <button type="submit" class="btn btn-neo">Войти</button>
+          <button type="submit" class="btn btn-neo">Log in</button>
         </div>
       </form>
 
       <p class="auth-meta text-center mt-3 mb-0">
         Нет аккаунта?
-        <a href="{% url 'register' %}">Зарегистрироваться</a>
+        <a href="{% url 'register' %}">Sign up</a>
       </p>
     </div>
   </div>

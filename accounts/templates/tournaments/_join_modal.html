@@ -1,20 +1,15 @@
-{# templates/tournaments/_join_modal.html #}
-
 <div class="modal fade modal-glass" id="joinTournamentModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content card-dark card-ring">
-
       <div class="modal-header border-0 pb-0">
-        <h5 class="modal-title fw-extrabold">Выберите команду</h5>
+        <h5 class="modal-title fw-extrabold">Choose a team</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-
       <div class="modal-body pt-3">
         {% if captain_teams %}
           <p class="text-muted mb-3">
-            Вы — капитан следующих команд. Выберите, от какой команды хотите участвовать.
+           You are the captain of the following teams. Choose which team you want to participate with.
           </p>
-
           <div class="list-group list-group-flush">
             {% for tm in captain_teams %}
               <a class="list-group-item list-group-item-action d-flex align-items-center justify-content-between"
@@ -37,15 +32,13 @@
           </div>
         {% else %}
           <div class="alert alert-dark border rounded-3 mb-0">
-            У вас нет команд, где вы капитан. Создайте команду и вернитесь к регистрации.
+            You don’t have any teams where you’re the captain. Create a team and return to register.
           </div>
         {% endif %}
       </div>
-
       <div class="modal-footer border-0 pt-0">
-        <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Закрыть</button>
+        <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Close</button>
       </div>
-
     </div>
   </div>
 </div>

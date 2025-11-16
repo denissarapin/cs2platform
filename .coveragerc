@@ -1,0 +1,21 @@
+[run]
+branch = True
+source =
+    tournaments
+    teams
+    servers
+    accounts
+omit =
+    */migrations/*
+    */tests/*
+    */tests.py
+    */conftest.py
+    */apps.py  
+    */wsgi.py
+    */asgi.py
+    */manage.py
+    */templatetags/*
+[report]
+show_missing = True
+skip_covered = False
+precision = 0

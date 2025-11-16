@@ -1,4 +1,3 @@
-# teams/views.py
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth import get_user_model
@@ -13,26 +12,16 @@ from .forms import TeamCreateForm
 
 User = get_user_model()
 
-
-# =============================
-# ВСПОМОГАТЕЛЬНЫЕ УТИЛИТЫ
-# =============================
-
 def _is_htmx(request) -> bool:
-    """Проверка, является ли запрос HTMX-запросом."""
     return request.headers.get("HX-Request") == "true"
 
-
-# =============================
-# ОСНОВНЫЕ СТРАНИЦЫ
-# =============================
 @login_required
 def my_teams(request):
     memberships = (
         TeamMembership.objects
         .filter(user=request.user)
         .select_related('team')
-        .annotate(  # ← добавим поле m.pending_invites
+        .annotate(
             pending_invites=Count(
                 'team__invites',
                 filter=Q(team__invites__status=TeamInvite.Status.PENDING)
@@ -43,7 +32,6 @@ def my_teams(request):
         'memberships': memberships,
     })
 
-
 @login_required
 def team_create(request):
     if request.method == "POST":
@@ -53,15 +41,13 @@ def team_create(request):
             team.captain = request.user
             team.save()
             TeamMembership.objects.create(user=request.user, team=team, role="captain")
-            messages.success(request, "Команда создана!")
+            messages.success(request, "Team created!")
             return redirect("teams:team_detail", slug=team.slug)
     else:
         form = TeamCreateForm()
     return render(request, "teams/team_create.html", {"form": form})
 
-
 def team_detail(request, slug):
-    """Главная страница команды."""
     team = get_object_or_404(Team, slug=slug)
     members = team.memberships.select_related("user").order_by("-role", "user__username")
 
@@ -84,11 +70,6 @@ def team_detail(request, slug):
         },
     )
 
-
-# =============================
-# ЧЛЕНСТВО
-# =============================
-
 @login_required
 def join_by_code(request, code):
     team = get_object_or_404(Team, invite_code=code)
@@ -96,29 +77,27 @@ def join_by_code(request, code):
         user=request.user, team=team, defaults={"role": "player"}
     )
     if created:
-        messages.success(request, f"Вы вступили в команду [{team.tag}] {team.name}")
+        messages.success(request, f"You joined the team [{team.tag}] {team.name}")
     else:
-        messages.info(request, "Вы уже состоите в этой команде.")
+        messages.info(request, "You are already in this team")
     return redirect("teams:team_detail", slug=team.slug)
-
 
 @login_required
 def leave_team(request, slug):
     team = get_object_or_404(Team, slug=slug)
     membership = get_object_or_404(TeamMembership, user=request.user, team=team)
     if membership.role == "captain":
-        messages.error(request, "Капитан не может выйти. Сначала передайте роль капитана.")
+        messages.error(request, "The captain cannot leave. Transfer captain role first")
         return redirect("teams:team_detail", slug=team.slug)
     membership.delete()
-    messages.success(request, "Вы покинули команду.")
+    messages.success(request, "You have left the team")
     return redirect("teams:my_teams")
-
 
 @login_required
 def transfer_captain(request, slug, user_id):
     team = get_object_or_404(Team, slug=slug)
     if team.captain_id != request.user.id:
-        messages.error(request, "Только капитан может передать капитанство.")
+        messages.error(request, "Only the captain can transfer captaincy")
         return redirect("teams:team_detail", slug=team.slug)
 
     new_cap = get_object_or_404(TeamMembership, team=team, user_id=user_id)
@@ -126,27 +105,33 @@ def transfer_captain(request, slug, user_id):
     TeamMembership.objects.filter(team=team, user=new_cap.user).update(role="captain")
     team.captain = new_cap.user
     team.save(update_fields=["captain"])
-    messages.success(request, "Капитанство передано.")
+    messages.success(request, "Captaincy transferred")
     return redirect("teams:team_detail", slug=team.slug)
-
 
 @login_required
 def remove_member(request, slug, user_id):
     team = get_object_or_404(Team, slug=slug)
     if team.captain_id != request.user.id:
-        messages.error(request, "Только капитан может исключать игроков.")
+        messages.error(request, "Only the captain can remove members")
         return redirect("teams:team_detail", slug=team.slug)
     if user_id == team.captain_id:
-        messages.error(request, "Нельзя удалить капитана.")
+        messages.error(request, "You cannot remove the captain")
         return redirect("teams:team_detail", slug=team.slug)
     TeamMembership.objects.filter(team=team, user_id=user_id).delete()
-    messages.success(request, "Игрок удалён из команды.")
+    messages.success(request, "Player removed from the team")
     return redirect("teams:team_detail", slug=team.slug)
 
+@login_required
+def delete_team(request, slug):
+    team = get_object_or_404(Team, slug=slug)
+    if team.captain_id != request.user.id:
+        return HttpResponseForbidden("Only captain can delete the team.")
 
-# =============================
-# ПОИСК И ИНВАЙТЫ
-# =============================
+    if request.method != "POST":
+        return HttpResponse(status=405)
+    team.delete()
+    messages.success(request, "Team deleted")
+    return redirect("teams:my_teams")
 
 @login_required
 def user_search(request, slug):
@@ -155,42 +140,33 @@ def user_search(request, slug):
         return HttpResponseForbidden("Only captain can invite")
 
     q = (request.GET.get("q") or "").strip()
-
-    # уже в команде / уже приглашены
     existing_ids = TeamMembership.objects.filter(team=team).values_list("user_id", flat=True)
     invited_ids = TeamInvite.objects.filter(
         team=team, status=TeamInvite.Status.PENDING
     ).values_list("invited_user_id", flat=True)
 
-    # базовый набор кандидатов
     candidates = (
         User.objects
         .filter(is_active=True)
-        # исключаем «социальные/технические» записи без нормального пароля
         .exclude(password__startswith="!")
-        # и без почты, чтобы отсечь импортированные «стим-ники»
         .exclude(email__isnull=True)
         .exclude(email__exact="")
-        # не показываем себя, уже добавленных и уже приглашённых
         .exclude(id=request.user.id)
         .exclude(id__in=list(existing_ids) + list(invited_ids))
         .order_by("username")
     )
-
     if q:
         candidates = candidates.filter(username__istartswith=q)
     else:
-        candidates = candidates[:5]  # дефолтные подсказки
+        candidates = candidates[:5]
 
     return render(request, "teams/_user_search_results.html", {
         "team": team,
         "candidates": candidates,
     })
 
-
 @login_required
 def send_invite(request, slug):
-    """Создание/возобновление инвайта"""
     if request.method != "POST":
         return HttpResponse(status=405)
     team = get_object_or_404(Team, slug=slug)
@@ -228,10 +204,10 @@ def send_invite(request, slug):
     candidates = (
         User.objects
         .filter(is_active=True)
-        .exclude(password__startswith="!")      # ⬅️ как в user_search
-        .exclude(email__isnull=True)            # ⬅️
-        .exclude(email__exact="")               # ⬅️
-        .exclude(id=request.user.id)            # ⬅️
+        .exclude(password__startswith="!")   
+        .exclude(email__isnull=True)
+        .exclude(email__exact="")
+        .exclude(id=request.user.id)
         .exclude(id__in=list(existing_ids) + list(invited_ids))
         .order_by("username")
     )
@@ -251,7 +227,6 @@ def send_invite(request, slug):
         "teams/_invite_response_bundle.html",
         {"team": team, "candidates": candidates, "outgoing": outgoing},
     )
-
 
 @login_required
 def outgoing_invites(request, slug):
@@ -281,19 +256,12 @@ def cancel_invite(request, slug, invite_id):
 
     return render(request, "teams/_invites_outgoing.html", {"team": team, "outgoing": outgoing})
 
-
-# =============================
-# ПАНЕЛЬ УВЕДОМЛЕНИЙ (ИНВАЙТЫ)
-# =============================
-
-
 @login_required
 def invites_count(request):
     count = TeamInvite.objects.filter(
         invited_user=request.user,
         status=TeamInvite.Status.PENDING
     ).count()
-    # ⬇️ без OOB на первичной подгрузке
     return render(request, "teams/_notif_count.html", {
         "pending_count": count,
         "oob": False,
@@ -305,12 +273,7 @@ def invites_panel(request):
                .filter(invited_user=request.user, status=TeamInvite.Status.PENDING)
                .select_related("team", "invited_by")
                .order_by("-created_at"))
-    # внутри панели мы ещё и OOB-обновляем бейдж
     return render(request, "teams/_notif_panel.html", {"pending": pending})
-
-# =============================
-# ПРИНЯТИЕ / ОТКЛОНЕНИЕ ИНВАЙТА
-# =============================
 
 @login_required
 def accept_invite(request, code):
@@ -320,7 +283,7 @@ def accept_invite(request, code):
     if invite.status != TeamInvite.Status.PENDING:
         if _is_htmx(request):
             return invites_panel(request)
-        messages.info(request, "Приглашение уже обработано.")
+        messages.info(request, "Invite already processed")
         return redirect("teams:my_teams")
 
     invite.accept()
@@ -335,7 +298,7 @@ def accept_invite(request, code):
         resp.content = resp.content + oob.encode("utf-8")
         return resp
 
-    messages.success(request, f"Вы вступили в [{invite.team.tag}] {invite.team.name}.")
+    messages.success(request, f"You have joined [{invite.team.tag}] {invite.team.name}.")
     return redirect("teams:team_detail", slug=invite.team.slug)
 
 
@@ -357,5 +320,5 @@ def decline_invite(request, code):
         resp.content = resp.content + oob.encode("utf-8")
         return resp
 
-    messages.info(request, "Приглашение отклонено.")
+    messages.info(request, "Invite declined")
     return redirect("teams:my_teams")

@@ -1,31 +1,16 @@
-{# templates/teams/_invites_outgoing.html #}
-{% comment %}
-Шаблон выводит список исходящих (pending) инвайтов.
-В контексте должны быть:
-- team: текущая команда
-- outgoing: queryset TeamInvite со status="pending"
-{% endcomment %}
 {% if outgoing and outgoing|length > 0 %}
-  <div class="text-white-50 mb-2">Отправленные приглашения:</div>
-
+  <div class="text-white-50 mb-2">Sent invitations:</div>
   <ul class="list-group">
     {% for inv in outgoing %}
       <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent text-white border-secondary">
         <span>{{ inv.invited_user.username }}</span>
-
-        <form
-          hx-post="{% url 'teams:cancel_invite' team.slug inv.id %}"
-          hx-target="#outgoingInvites"
-          hx-swap="outerHTML"
-          class="m-0"
-        >
+        <form hx-post="{% url 'teams:cancel_invite' team.slug inv.id %}" hx-target="#outgoingInvites" hx-swap="outerHTML" class="m-0">
           {% csrf_token %}
-          <button type="submit" class="btn btn-outline-light btn-sm">Отменить</button>
+          <button type="submit" class="btn btn-outline-light btn-sm">Cancel</button>
         </form>
       </li>
     {% endfor %}
   </ul>
-
 {% else %}
-  <div class="text-white-50">Пока нет исходящих приглашений.</div>
+  <div class="text-white-50">No outgoing invitations yet.</div>
 {% endif %}

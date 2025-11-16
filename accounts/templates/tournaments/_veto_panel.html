@@ -1,5 +1,4 @@
 {% load static %}
-
 {% if not final_map %}
   <section class="ov-card card-dark card-ring veto-full">
     {% if match.veto_deadline %}
@@ -11,12 +10,11 @@
         </div>
         {% if current_team %}
           <div class="timer-turn text-muted">
-            Ход команды: <b>{{ current_team.name }}</b>
+            Team’s turn: <b>{{ current_team.name }}</b>
           </div>
         {% endif %}
       </div>
     {% endif %}
-
     <div class="veto-grid">
       {% for code,label in map_pool %}
         <div class="veto-card {% if code not in available_codes %}disabled{% endif %}">
@@ -24,9 +22,9 @@
           <div class="vc-body">
             <div class="vc-title">{{ label }}</div>
             {% if code in available_codes %}
-              <button type="button" class="btn btn-danger btn-sm ban-btn" data-map="{{ code }}">Забанить</button>
+              <button type="button" class="btn btn-danger btn-sm ban-btn" data-map="{{ code }}">Ban</button>
             {% else %}
-              <span class="chip chip-dark">Забанена</span>
+              <span class="chip chip-dark">Banned</span>
             {% endif %}
           </div>
         </div>
@@ -35,20 +33,20 @@
   </section>
 {% else %}
   <section class="ov-card">
-    <div class="ov-card-h">Бан/пик карт</div>
+    <div class="ov-card-h">Map ban/pick</div>
     {% if bans %}
       <ul class="ban-list">
         {% for ban in bans %}
           <li>
             <span class="idx">{{ forloop.counter }}.</span>
             <span class="who">[{% if ban.team.tag %}{{ ban.team.tag }}{% else %}—{% endif %}] {{ ban.team.name }}</span>
-            <span class="act">{% if ban.action == 'pick' %}выбрал{% else %}забанил{% endif %}</span>
+            <span class="act">{% if ban.action == 'pick' %}picked{% else %}banned{% endif %}</span>
             <span class="map">{{ ban.get_map_name_display }}</span>
           </li>
         {% endfor %}
       </ul>
     {% else %}
-      <div class="text-muted">Действий нет.</div>
+      <div class="text-muted">No actions.</div>
     {% endif %}
   </section>
 {% endif %}

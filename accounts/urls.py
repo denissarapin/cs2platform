@@ -10,5 +10,4 @@ urlpatterns = [
     path('steam/connect/', views.connect_steam, name='connect_steam'),
     path('steam/verify/', views.steam_verify, name='steam_verify'),
     path('steam/disconnect/', views.steam_disconnect, name='steam_disconnect'),
-
 ]

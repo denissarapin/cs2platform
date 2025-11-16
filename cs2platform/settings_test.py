@@ -1,15 +1,12 @@
-# cs2platform/settings_test.py
 from pathlib import Path
 import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# --- безопасные переменные окружения для тестов ---
 SECRET_KEY = "test-secret-key"
 DEBUG = True
 ALLOWED_HOSTS = ["*"]
-
-# Ключи: просто заглушки, НИЧЕГО не падает
+TOURNAMENT_MIN_TEAMS = 4
 FACEIT_API_KEY = os.getenv("FACEIT_API_KEY", "dummy")
 STEAM_WEB_API_KEY = os.getenv("STEAM_WEB_API_KEY", "dummy")
 
@@ -48,7 +45,6 @@ TEMPLATES = [{
 ASGI_APPLICATION = "cs2platform.asgi.application"
 WSGI_APPLICATION = "cs2platform.wsgi.application"
 
-# --- SQLite для тестов ---
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -56,7 +52,6 @@ DATABASES = {
     }
 }
 
-# --- InMemory канал-лейер для Channels ---
 CHANNEL_LAYERS = {
     "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
 }

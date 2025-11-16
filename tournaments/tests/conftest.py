@@ -1,4 +1,3 @@
-# tests/conftest.py
 import pytest
 from django.contrib.auth import get_user_model
 from django.utils import timezone
@@ -30,7 +29,6 @@ def make_team(db, make_user):
 
 @pytest.fixture
 def tournament(db):
-    # делаем aware datetime, чтобы не ругалось на naive
     return Tournament.objects.create(name="Cup", start_date=timezone.now())
 
 @pytest.fixture

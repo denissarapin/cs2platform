@@ -1,21 +1,15 @@
+import re
 from django.shortcuts import render, redirect
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from .forms import SteamLookupForm, CustomUserCreationForm, ProfileEditForm
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from django.contrib import messages
-import re
 from urllib.parse import urlencode
-from .services import get_faceit_profile_by_steam, get_faceit_stats
-from .services import (
-    get_faceit_profile_by_steam_cached,
-    get_faceit_stats_cached,
-    get_steam_profile_cached,
-    resolve_steam_input_to_steam64_cached,
-)
+from .services import get_faceit_profile_by_steam, get_faceit_stats, get_faceit_profile_by_steam_cached, get_faceit_stats_cached, get_steam_profile_cached, resolve_steam_input_to_steam64_cached
 from .forms import SignUpForm
+
 def _to_float(x):
     try:
         return float(x)
@@ -36,11 +30,12 @@ def register(request):
     if request.method == "POST":
         form = SignUpForm(request.POST)
         if form.is_valid():
-            form.save()
-            # ...
+            user = form.save()
+            login(request, user)
+            return redirect("home")
     else:
         form = SignUpForm()
-    return render(request, "register.html", {"form": form})
+    return render(request, "accounts/register.html", {"form": form})
 
 @login_required
 def profile_view(request):
@@ -48,31 +43,24 @@ def profile_view(request):
     faceit_error = None
     steam = None
     used_steam_id = None
-
-    # форма для ручного ввода
     lookup_form = SteamLookupForm(request.POST or None)
-
-    # подключённый к профилю SteamID (если есть)
     connected_id = getattr(request.user, "steam_id", None)
 
-    # приоритет: сначала ввод пользователя, потом подключённый ID
     raw_input = None
     if request.method == "POST" and lookup_form.is_valid():
         raw_input = (lookup_form.cleaned_data.get("steam_id") or "").strip()
 
     if raw_input:
-        # Пробуем превратить ввод (ID/URL/alias) → SteamID64
         resolved = resolve_steam_input_to_steam64_cached(raw_input)
         if resolved:
             used_steam_id = resolved
         else:
-            lookup_form.add_error("steam_id", "❌ Не удалось найти профиль Steam по этому вводу.")
-            used_steam_id = connected_id  # fallback
+            lookup_form.add_error("steam_id", "❌ Could not find a Steam profile using this input")
+            used_steam_id = connected_id
     else:
         used_steam_id = connected_id
 
     if used_steam_id:
-        # Карточка Steam (ник, аватар, ссылка)
         sp = get_steam_profile_cached(used_steam_id)
         steam = {
             "id": used_steam_id,
@@ -101,14 +89,14 @@ def profile_view(request):
                         "kd_avg": _to_float(lifetime.get("Average K/D Ratio")),
                         "winrate": _to_float(lifetime.get("Win Rate %")),
                     },
-                    "maps": _parse_maps(stats_raw),  # ← НОВОЕ
+                    "maps": _parse_maps(stats_raw),
                 }
             else:
-                faceit_error = "⚠️ Профиль Faceit не найден по этому SteamID."
+                faceit_error = "⚠️ Faceit profile not found for this SteamID"
         except Exception:
-            faceit_error = "⚠️ Ошибка при запросе к Faceit API. Проверь ключ и лимиты."
+            faceit_error = "⚠️ Error while requesting the Faceit API. Check the API key and rate limits"
     else:
-        faceit_error = "Подключите Steam или введите SteamID / ссылку / alias вручную."
+        faceit_error = "Connect Steam or enter a SteamID / link / alias manually"
 
     return render(request, "accounts/profile.html", {
         "faceit": faceit,
@@ -158,11 +146,7 @@ def logout_view(request):
 
 @login_required
 def connect_steam(request):
-    """
-    Редиректим пользователя на OpenID-страницу Steam.
-    После логина Steam вернёт нас на /accounts/steam/verify/.
-    """
-    return_to = request.build_absolute_uri(reverse('steam_verify'))  # абсолютный URL
+    return_to = request.build_absolute_uri(reverse('steam_verify')) 
     realm = f"{request.scheme}://{request.get_host()}/"
 
     params = {
@@ -178,12 +162,6 @@ def connect_steam(request):
 
 @login_required
 def steam_verify(request):
-    """
-    Steam возвращает сюда параметры OpenID.
-    Мы берём openid.claimed_id и вытаскиваем из него SteamID64.
-    Пример claimed_id:
-    https://steamcommunity.com/openid/id/7656119XXXXXXXXXX
-    """
     claimed_id = request.GET.get("openid.claimed_id")
     if claimed_id:
         m = re.search(r'/id/(\d+)$', claimed_id)
@@ -193,7 +171,7 @@ def steam_verify(request):
             request.user.save(update_fields=["steam_id"])
             return redirect("profile")
 
-    messages.error(request, "Не удалось подтвердить Steam аккаунт.")
+    messages.error(request, "Failed to verify Steam account")
     return redirect("profile")
 
 @login_required
@@ -206,11 +184,11 @@ def steam_disconnect(request):
 def faceit_stats_view(request):
     steam_id = request.user.steam_id
     if not steam_id:
-        return render(request, "accounts/faceit_stats.html", {"error": "Сначала подключите Steam"})
+        return render(request, "accounts/faceit_stats.html", {"error": "Connect Steam first"})
 
     profile = get_faceit_profile_by_steam(steam_id)
     if not profile:
-        return render(request, "accounts/faceit_stats.html", {"error": "Профиль Faceit не найден"})
+        return render(request, "accounts/faceit_stats.html", {"error": "Faceit profile not found"})
 
     stats = get_faceit_stats(profile["player_id"])
     return render(request, "accounts/faceit_stats.html", {
@@ -219,10 +197,6 @@ def faceit_stats_view(request):
     })
 
 def _parse_maps(stats_raw):
-    """
-    Достаёт список карт из Faceit stats -> segments.
-    Возвращает [{name, matches, winrate, kd}], отсортировано по кол-ву матчей.
-    """
     segs = (stats_raw or {}).get("segments") or []
     maps = []
     for seg in segs:
@@ -231,7 +205,6 @@ def _parse_maps(stats_raw):
             continue
 
         label = seg.get("label") or seg.get("mode") or seg.get("map") or ""
-        # приводим имя к виду Mirage, Inferno и т.п.
         name = label.replace("de_", "").replace("cs_", "").strip().capitalize() or "—"
 
         st = seg.get("stats") or {}

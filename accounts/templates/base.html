@@ -3,9 +3,10 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0d121c">
   <title>{% block title %}CS2 Platform{% endblock %}</title>
   {% block extra_css %}
-  <!-- Bootstrap / Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -36,7 +37,6 @@
       -webkit-mask-composite: xor; mask-composite: exclude;
       opacity:.9;
     }
-
     .profile-hero{ overflow:hidden; }
     .profile-hero--dark{
       background:
@@ -45,11 +45,8 @@
       border: 1px solid rgba(148,163,184,.16);
     }
   </style>
-
-  <!-- HTMX -->
   <script src="https://unpkg.com/htmx.org@1.9.12"></script>
   <script>
-    // Прокидываем CSRF в каждый HTMX-запрос
     document.body.addEventListener('htmx:configRequest', (e) => {
       const name = 'csrftoken';
       const m = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
@@ -57,98 +54,99 @@
     });
   </script>
 </head>
-
 <body class="{% block body_class %}bg-light{% endblock %}">
 
-<!-- NAV -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 px-3">
   <div class="container-fluid">
     <a class="navbar-brand" href="{% url 'home' %}">CS2 Platform</a>
 
-    <div class="d-flex align-items-center ms-auto">
-      {% if user.is_authenticated %}
-        <ul class="navbar-nav d-flex flex-row align-items-center">
-          <li class="nav-item mx-2">
-            <a class="nav-link" href="{% url 'profile' %}">
-              <i class="bi bi-person"></i> Профиль
+    <!-- Кнопка-гамбургер для < lg -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+            aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Всё меню уедет в collapse на мобилках -->
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav ms-auto align-items-lg-center">
+        {% if user.is_authenticated %}
+          <li class="nav-item mx-lg-2">
+            <a class="nav-link d-flex align-items-center gap-2" href="{% url 'profile' %}">
+              <i class="bi bi-person"></i> <span class="nav-label">Profile</span>
             </a>
           </li>
-          <li class="nav-item mx-2">
-            <a class="nav-link" href="{% url 'teams:my_teams' %}">
-              <i class="bi bi-people"></i> Мои команды
+          <li class="nav-item mx-lg-2">
+            <a class="nav-link d-flex align-items-center gap-2" href="{% url 'teams:my_teams' %}">
+              <i class="bi bi-people"></i> <span class="nav-label">Teams</span>
             </a>
           </li>
-          <li class="nav-item mx-2">
-            <a class="nav-link" href="{% url 'tournaments:list' %}">
-              <i class="bi bi-trophy"></i> Турниры
+          <li class="nav-item mx-lg-2">
+            <a class="nav-link d-flex align-items-center gap-2" href="{% url 'tournaments:list' %}">
+              <i class="bi bi-trophy"></i> <span class="nav-label">Tournaments</span>
             </a>
           </li>
-          <li class="nav-item mx-2">
-            <a class="nav-link" href="{% url 'servers:home' %}">
-              <i class="bi bi-hdd-network"></i> Наши сервера
+          <li class="nav-item mx-lg-2">
+            <a class="nav-link d-flex align-items-center gap-2" href="{% url 'servers:home' %}">
+              <i class="bi bi-hdd-network"></i> <span class="nav-label">Servers</span>
             </a>
           </li>
 
-          <!-- 🔔 Уведомления -->
-          <li class="nav-item dropdown mx-2 position-relative">
-            <button id="notifBtn" class="btn btn-dark position-relative" data-bs-toggle="dropdown" aria-expanded="false">
+          <li class="nav-item dropdown mx-lg-2">
+            <button id="notifBtn" class="btn btn-dark position-relative w-100 w-lg-auto" data-bs-toggle="dropdown" aria-expanded="false">
               <i class="bi bi-bell"></i>
               <span id="notifCount"
                     hx-get="{% url 'teams:invites_count' %}"
                     hx-trigger="load"
                     hx-swap="outerHTML"></span>
+              <span class="nav-label ms-1"></span>
             </button>
-
             <div id="notifMenu"
-                class="dropdown-menu dropdown-menu-end p-0 shadow-lg notif-menu"
-                data-bs-popper="static"
-                hx-get="{% url 'teams:invites_panel' %}"
-                hx-trigger="shown.bs.dropdown from:#notifBtn"
-                hx-target="#notifMenu"
-                hx-swap="innerHTML">
-              <div class="p-3 text-center text-white-50">Загрузка…</div>
+                 class="dropdown-menu dropdown-menu-end p-0 shadow-lg notif-menu"
+                 data-bs-popper="static"
+                 hx-get="{% url 'teams:invites_panel' %}"
+                 hx-trigger="shown.bs.dropdown from:#notifBtn"
+                 hx-target="#notifMenu"
+                 hx-swap="innerHTML">
+              <div class="p-3 text-center text-white-50">Loading…</div>
             </div>
           </li>
 
-          <li class="nav-item mx-2">
-            <a class="nav-link text-danger" href="{% url 'logout' %}">
-              <i class="bi bi-box-arrow-right"></i> Выйти
+          <li class="nav-item mx-lg-2">
+            <a class="nav-link text-danger d-flex align-items-center gap-2" href="{% url 'logout' %}">
+              <i class="bi bi-box-arrow-right"></i> <span class="nav-label">Logout</span>
             </a>
           </li>
-        </ul>
-      {% else %}
-        <a href="{% url 'login' %}" class="auth-btn btn-sm btn-login me-2">Вход</a>
-        <a href="{% url 'register' %}" class="auth-btn btn-sm btn-register">Регистрация</a>
-      {% endif %}
+        {% else %}
+          <li class="nav-item ms-lg-2 my-2 my-lg-0">
+            <a href="{% url 'login' %}" class="auth-btn btn-sm btn-login me-2 w-100 w-lg-auto">Log in</a>
+            <a href="{% url 'register' %}" class="auth-btn btn-sm btn-register w-100 w-lg-auto mt-2 mt-lg-0">Sign Up</a>
+          </li>
+        {% endif %}
+      </ul>
     </div>
   </div>
 </nav>
-
 {% if messages %}
-  <div class="container mt-3">
+  <div id="msg-stack" class="container mt-3">
     {% for message in messages %}
-      <div class="alert alert-{{ message.tags }} mb-2" role="alert">
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-2" role="alert">
         {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
     {% endfor %}
   </div>
 {% endif %}
-
 <div class="container">
   {% block content %}{% endblock %}
 </div>
-
 <script>
-  // Копирование по data-copy
   document.addEventListener('click', e => {
     if (e.target.matches('[data-copy]')) {
       navigator.clipboard.writeText(e.target.getAttribute('data-copy'));
-      e.target.innerText='Скопировано!';
-      setTimeout(()=>e.target.innerText='Скопировать',1200);
+      e.target.innerText='Copied!';
+      setTimeout(()=>e.target.innerText='Copied',1200);
     }
   });
-
-  // Открыть/закрыть панель уведомлений (клик по колоколу и клик вне)
   (function(){
     const bell  = document.getElementById('notifBell');
     const panel = document.getElementById('notifPanel');
@@ -162,7 +160,6 @@
       }
     });
 
-    // При любом успешном HTMX запросе, если ответ пришёл в панель — показать её
     document.body.addEventListener('htmx:afterOnLoad', (e) => {
       if (e.detail.target === panel) panel.classList.remove('d-none');
     });
@@ -173,12 +170,38 @@
       const parts = value.split(`; ${name}=`);
       if (parts.length === 2) return parts.pop().split(';').shift();
     }
-    // Работает и в <head>, и после
     document.addEventListener('htmx:configRequest', function (e) {
       const token = getCookie('csrftoken');
       if (token) e.detail.headers['X-CSRFToken'] = token;
     });
   })();
+  (function () {
+  function autoDismissAlerts(root = document) {
+    root.querySelectorAll('#msg-stack .alert').forEach(function (el) {
+      // уже запланирован? — пропускаем
+      if (el.dataset.autodismiss) return;
+      el.dataset.autodismiss = '1';
+
+      setTimeout(function () {
+        if (window.bootstrap && bootstrap.Alert) {
+          bootstrap.Alert.getOrCreateInstance(el).close();
+        } else {
+          // без bootstrap JS: плавно скрываем
+          el.classList.remove('show');
+          el.addEventListener('transitionend', function () { el.remove(); }, { once: true });
+        }
+      }, 5000); // 5s
+    });
+  }
+
+  // при первой загрузке
+  document.addEventListener('DOMContentLoaded', function () { autoDismissAlerts(); });
+
+  // если используешь htmx — перевешиваем после подмены DOM
+  document.body.addEventListener('htmx:afterSwap', function (e) {
+    autoDismissAlerts(e.target);
+  });
+})();
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
