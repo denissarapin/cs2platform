@@ -9,3 +9,8 @@ whitenoise
 requests
 python-dotenv 
 Pillow
+pytest
+pytest-django
+pytest-asyncio
+pytest-cov
+Faker
