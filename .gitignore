@@ -7,8 +7,7 @@ db.sqlite3
 
 # venv / tools
 venv/
-.env
-.env.* 
+.env 
 
 # Django build artifacts
 staticfiles/
