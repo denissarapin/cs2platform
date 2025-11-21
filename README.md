@@ -1,74 +1,83 @@
 # CS2 Platform
 
-A Django-based platform for hosting CS2 tournaments: teams, brackets, veto workflow, match pages, and live updates via WebSockets (Channels).
+A Django-based platform for hosting and managing CS2 tournaments with real-time features.
+Includes team management, registration workflow, full tournament brackets, match pages, CS2-style map veto, and live updates powered by Django Channels.
 
-## Tech Stack
-- **Django 5**, **Django REST Framework**
-- **Django Channels** + **Redis** (WebSockets)
-- **PostgreSQL**
-- **Docker / docker compose**
-- **pytest** for tests
-- **Whitenoise** for static files
+# Key Features
 
----
+Tournament lifecycle (registration → bracket → matches → results → finish)
 
-## Quick Start (Docker)
+Single-elimination bracket generation & progression (service layer + atomic DB updates)
 
-1) Create a `.env` from the example:
-```bash
+Real-time UI updates via WebSockets (Channels + Redis) using server-rendered HTML fragments
+
+Match pages with live updates: scores, bans, veto flow, final map
+
+CS2-style map veto system with turn-based banning logic and captain-only actions
+
+Role-based access control for staff and tournament admins
+
+REST API endpoints for tournaments and matches (DRF)
+
+HTMX-enhanced views for dynamic forms and partial updates without a full SPA
+
+# Tech Stack
+
+Django 5, Django REST Framework
+
+Django Channels + Redis (WebSockets)
+
+PostgreSQL
+
+Docker / docker compose
+
+pytest for tests
+
+Whitenoise for static files
+
+# Quick Start (Docker)
+1) Create .env
 cp .env.example .env
-# Edit .env and fill in secrets/keys
 
-2)Build and start:
-
+2) Build & start
 docker compose build
 docker compose up -d
 
-3)Run migrations and create a superuser:
-
+3) Migrate & create superuser
 docker compose exec web python manage.py migrate
 docker compose exec web python manage.py createsuperuser
 
-
-4)Open:
+4) Open
 
 App: http://localhost:8000
 
 Admin: http://localhost:8000/admin
 
-If you use django.contrib.sites, create a Site record with domain localhost:8000.
+If you use django.contrib.sites, add a Site with domain localhost:8000.
 
-Stop:
-
+Stop
 docker compose down
 
-
-5)Environment Variables
-
-# Django
+# Environment Variables
 DJANGO_DEBUG=1
 DJANGO_SECRET_KEY=change-me
 DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
 DJANGO_CSRF_TRUSTED_ORIGINS=http://localhost:8000
 
-# API keys
 FACEIT_API_KEY=...
 STEAM_WEB_API_KEY=...
 
-# Database
 POSTGRES_DB=cs2db
 POSTGRES_USER=cs2user
 POSTGRES_PASSWORD=changeme
-POSTGRES_HOST=db        # Docker: db, Local: localhost
+POSTGRES_HOST=db
 POSTGRES_PORT=5432
 
-# Channels / Redis
 REDIS_URL=redis://redis:6379/0
 
+# Local Development (without Docker)
 
-6)Local Development (without Docker)
-
-Requires PostgreSQL and Redis installed locally.
+Requires PostgreSQL + Redis installed locally.
 
 python -m venv venv
 source venv/bin/activate
@@ -79,19 +88,19 @@ cp .env.example .env  # edit it
 python manage.py migrate
 python manage.py runserver
 
-7)Running Tests
+# Running Tests
 pytest -q
-# or inside Docker:
+or inside Docker:
 docker compose exec web pytest -q
 
-8)Common Commands
+# Common Commands
 
-Collect static (if needed):
+Collect static:
 
 docker compose exec web python manage.py collectstatic --noinput
 
 
-Fresh DB (dev):
+Fresh dev DB:
 
 docker compose down -v
 docker compose up -d
@@ -102,10 +111,10 @@ Logs:
 
 docker compose logs -f web
 
-9)Project Structure (short)
+# Project Structure (short)
 cs2platform/
-  accounts/ teams/ servers/ tournaments/   # Django apps
-  cs2platform/                             # settings, urls, asgi, wsgi
+  accounts/ teams/ servers/ tournaments/    
+  cs2platform/ 
   static/ staticfiles/ media/
 docker-compose.yml
 Dockerfile
