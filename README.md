@@ -4,7 +4,7 @@ A Django-based platform for hosting and managing CS2 tournaments with real-time 
 Includes team management, registration workflow, full tournament brackets, match pages, CS2-style map veto, and live updates powered by Django Channels.
 
 ### Tournament Bracket
-![Tournament Bracket](assets/Main.jpg)
+![Tournament Bracket](cs2platform/assets/Main.jpg)
 
 # Key Features
 
