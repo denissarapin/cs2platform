@@ -1,30 +1,31 @@
-# CS2 Platform
+# 🎮 CS2 Platform
 
-A Django-based platform for hosting and managing CS2 tournaments with real-time features.
-Includes team management, registration workflow, full tournament brackets, match pages, CS2-style map veto, and live updates powered by Django Channels.
+A production-ready Django-based platform for hosting and managing CS2 tournaments with real-time features.
+Includes team management, registration workflow, bracket generation, match pages, map veto, and live updates powered by Django Channels & WebSockets.
 
-### Tournament Bracket
-![Tournament Bracket](cs2platform/assets/Main.jpg)
+### 🚀 Key Features
 
-# Key Features
+✔ Full tournament lifecycle: registration → bracket → matches → results → finish
 
-Tournament lifecycle (registration → bracket → matches → results → finish)
+✔ Single-elimination bracket generation & progression
 
-Single-elimination bracket generation & progression (service layer + atomic DB updates)
+✔ Atomic DB operations for reliable tournament updates
 
-Real-time UI updates via WebSockets (Channels + Redis) using server-rendered HTML fragments
+✔ Real-time UI updates via WebSockets (Channels + Redis)
 
-Match pages with live updates: scores, bans, veto flow, final map
+✔ Live match pages: scores, bans, veto state, final map
 
-CS2-style map veto system with turn-based banning logic and captain-only actions
+✔ CS2-style map veto system (turn-based banning + captain-only access)
 
-Role-based access control for staff and tournament admins
+✔ Role-based access control for staff & tournament admins
 
-REST API endpoints for tournaments and matches (DRF)
+✔ REST API for tournaments & matches (Django REST Framework)
 
-HTMX-enhanced views for dynamic forms and partial updates without a full SPA
+✔ HTMX-powered UI for dynamic, SPA-like interactions
 
-# Tech Stack
+✔ Dockerized, ready for deployment and scaling
+
+### 🧱 Tech Stack
 
 Django 5, Django REST Framework
 
@@ -32,94 +33,91 @@ Django Channels + Redis (WebSockets)
 
 PostgreSQL
 
-Docker / docker compose
+Docker & docker compose
 
-pytest for tests
+pytest (tests)
 
-Whitenoise for static files
+Whitenoise (static files)
 
-# Quick Start (Docker)
-1) Create .env
+### 🐳 Quick Start (Docker)
+1️⃣ Create .env
 cp .env.example .env
 
-2) Build & start
+2️⃣ Build & start containers
 docker compose build
 docker compose up -d
 
-3) Migrate & create superuser
-docker compose exec web python manage.py migrate
+3️⃣ Run migrations & create admin
+docker compose exec web python manage.py migrate  
 docker compose exec web python manage.py createsuperuser
 
-4) Open
+4️⃣ Open the app
 
-App: http://localhost:8000
+🌐 App: http://localhost:8000
 
-Admin: http://localhost:8000/admin
+🔐 Admin: http://localhost:8000/admin
 
-If you use django.contrib.sites, add a Site with domain localhost:8000.
+If using django.contrib.sites, create a Site with domain localhost:8000.
 
-Stop
+Stop containers
 docker compose down
 
-# Environment Variables
-DJANGO_DEBUG=1
-DJANGO_SECRET_KEY=change-me
+### 🔧 Environment Variables
+DJANGO_DEBUG=1  
+DJANGO_SECRET_KEY=change-me  
 DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
 DJANGO_CSRF_TRUSTED_ORIGINS=http://localhost:8000
 
-FACEIT_API_KEY=...
+FACEIT_API_KEY=...  
 STEAM_WEB_API_KEY=...
 
-POSTGRES_DB=cs2db
-POSTGRES_USER=cs2user
-POSTGRES_PASSWORD=changeme
-POSTGRES_HOST=db
+POSTGRES_DB=cs2db  
+POSTGRES_USER=cs2user  
+POSTGRES_PASSWORD=changeme  
+POSTGRES_HOST=db  
 POSTGRES_PORT=5432
 
+### Channels / Redis
 REDIS_URL=redis://redis:6379/0
 
-# Local Development (without Docker)
+💻 Local Development (without Docker)
 
-Requires PostgreSQL + Redis installed locally.
+Requires PostgreSQL + Redis installed.
 
 python -m venv venv
-source venv/bin/activate
+source venv/bin/activate  
 pip install -r requirements.txt
 
-cp .env.example .env  # edit it
+cp .env.example .env  # edit values
 
-python manage.py migrate
+python manage.py migrate  
 python manage.py runserver
 
-# Running Tests
+🧪 Running Tests  
 pytest -q
-or inside Docker:
+
+Inside Docker:
+
 docker compose exec web pytest -q
 
-# Common Commands
-
-Collect static:
-
+🔁 Common Commands  
+Collect static:  
 docker compose exec web python manage.py collectstatic --noinput
 
-
-Fresh dev DB:
-
-docker compose down -v
-docker compose up -d
+Reset development DB:  
+docker compose down -v  
+docker compose up -d  
 docker compose exec web python manage.py migrate
 
-
-Logs:
-
+Logs:  
 docker compose logs -f web
 
-# Project Structure (short)
-cs2platform/
-  accounts/ teams/ servers/ tournaments/    
-  cs2platform/ 
-  static/ staticfiles/ media/
-docker-compose.yml
-Dockerfile
-docker/entrypoint.sh
-requirements.txt
+📁 Project Structure (short)  
+cs2platform/  
+  accounts/ teams/ servers/ tournaments/    # Core Django apps  
+  cs2platform/                              # settings, urls, asgi, wsgi  
+  static/ staticfiles/ media/  
+docker-compose.yml  
+Dockerfile  
+docker/entrypoint.sh  
+requirements.txt 
