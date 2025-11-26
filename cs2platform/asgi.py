@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
-load_dotenv()
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "cs2platform.settings")
+load_dotenv(".env.local")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "cs2platform.settings.local")
 
 from django.core.asgi import get_asgi_application
 django_asgi_app = get_asgi_application()

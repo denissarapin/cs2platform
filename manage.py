@@ -3,11 +3,11 @@
 import os
 import sys
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(".env.local")
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'cs2platform.settings')
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "cs2platform.settings.local")
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

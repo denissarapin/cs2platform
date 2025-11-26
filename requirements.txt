@@ -14,3 +14,5 @@ pytest-django
 pytest-asyncio
 pytest-cov
 Faker
+django-storages[s3]
+boto3
