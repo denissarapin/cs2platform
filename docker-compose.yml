@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
   db:
     image: postgres:16
@@ -15,22 +17,33 @@ services:
     image: redis:7-alpine
     restart: unless-stopped
 
-
   web:
     build:
-      context: .           
+      context: .
       dockerfile: Dockerfile
     depends_on:
       - db
       - redis
     env_file:
-      - ./.env              
+      - ./.env
     volumes:
-      - .:/app             
+      - .:/app
       - staticfiles:/app/staticfiles
       - media:/app/media
+    expose:
+      - "8000"  
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    depends_on:
+      - web
     ports:
-      - "8000:8000"
+      - "8000:80"
+    volumes:
+      - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - staticfiles:/static
+      - media:/media
     restart: unless-stopped
 
 volumes:

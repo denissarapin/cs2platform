@@ -1,9 +1,11 @@
 from pathlib import Path
 import os
+import urllib.parse as urlparse
 
-# ================== BASE ==================
-BASE_DIR = Path(__file__).resolve().parent.parent
+# ================== BASE DIR ==================
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+# ================== helpers ===================
 def env_bool(name: str, default: bool = False) -> bool:
     val = os.getenv(name)
     if val is None:
@@ -17,16 +19,14 @@ def env_list(name: str, default=None):
     return [x.strip() for x in raw.split(",") if x.strip()]
 
 # ------------------ Core switches ------------------
-DEBUG = env_bool("DJANGO_DEBUG", True)
+DEBUG = env_bool("DJANGO_DEBUG", False)
 
-# Никогда не держим продовый ключ в коде:
 SECRET_KEY = os.getenv(
     "DJANGO_SECRET_KEY",
-    "dev-insecure-key-only-for-local"  # для локалки/тестов
+    "dev-insecure-key-only-for-local"
 )
 
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", ["*"] if DEBUG else [])
-
 CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS", [])
 
 AUTH_USER_MODEL = "accounts.User"
@@ -34,12 +34,10 @@ AUTH_USER_MODEL = "accounts.User"
 # ================== Third-party keys ==================
 FACEIT_API_KEY = os.getenv("FACEIT_API_KEY", "")
 STEAM_WEB_API_KEY = os.getenv("STEAM_WEB_API_KEY", "")
-# Если очень хочешь жёстко требовать ключи на проде:
-if not DEBUG and not FACEIT_API_KEY:
-    raise RuntimeError("FACEIT_API_KEY is not set")
 
 TOURNAMENT_MIN_TEAMS = int(os.getenv("TOURNAMENT_MIN_TEAMS", "4"))
 SITE_ID = int(os.getenv("DJANGO_SITE_ID", "1"))
+
 # ================== Apps ==================
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -52,16 +50,16 @@ INSTALLED_APPS = [
     "django.contrib.sites",
     "django.contrib.humanize",
     "channels",
-
     "accounts",
     "teams",
     "servers",
     "tournaments",
+    "storages",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",  # до SessionMiddleware — ок
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -107,26 +105,24 @@ if REDIS_URL:
     }
 else:
     REDIS_HOST = os.getenv("REDIS_HOST")
-    REDIS_PORT = os.getenv("REDIS_PORT", "6379")
+    REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
     if REDIS_HOST:
         CHANNEL_LAYERS = {
             "default": {
                 "BACKEND": "channels_redis.core.RedisChannelLayer",
-                "CONFIG": {"hosts": [(REDIS_HOST, int(REDIS_PORT))]},
+                "CONFIG": {"hosts": [(REDIS_HOST, REDIS_PORT)]},
             }
         }
     else:
-        # Локально/в тестах — без Redis
-        CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
+        CHANNEL_LAYERS = {
+            "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
+        }
 
 # ================== Database ==================
-# 1) Если есть DATABASE_URL — используем его (например, от докера)
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 if DATABASE_URL:
-    # без dj-database-url: парсим вручную простые варианты postgres://user:pass@host:port/db
-    import urllib.parse as _url
-    p = _url.urlparse(DATABASE_URL)
+    p = urlparse.urlparse(DATABASE_URL)
     if p.scheme.startswith("postgres"):
         DB = {
             "ENGINE": "django.db.backends.postgresql",
@@ -139,16 +135,14 @@ if DATABASE_URL:
     else:
         raise RuntimeError(f"Unsupported DATABASE_URL scheme: {p.scheme}")
 else:
-    # 2) Иначе берем значения из переменных среды (как у тебя было)…
     DB = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.getenv("POSTGRES_DB", "cs2db"),
         "USER": os.getenv("POSTGRES_USER", "cs2user"),
         "PASSWORD": os.getenv("POSTGRES_PASSWORD", "mint123"),
-        "HOST": os.getenv("POSTGRES_HOST", "db"),   # <-- было "localhost"
+        "HOST": os.getenv("POSTGRES_HOST", "db"),
         "PORT": os.getenv("POSTGRES_PORT", "5432"),
     }
-    # 3) …а если DEBUG и Postgres не доступен — можно упростить жизнь SQLite:
     if DEBUG and os.getenv("USE_SQLITE", "0") == "1":
         DB = {
             "ENGINE": "django.db.backends.sqlite3",
@@ -163,11 +157,19 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-# ================== Static / Media ==================
+# ================== Static / Media (defaults) =========
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"

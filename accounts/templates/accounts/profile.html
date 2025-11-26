@@ -128,7 +128,7 @@
                     {% with lvl=faceit.level|default:0 %}
                       {% if lvl %}
                         <img
-                          src="{% static 'img/faceit/levels/skill_level_' %}{{ lvl }}.png"
+                          src="{% static 'img/faceit/levels/skill_level_'|add:lvl|add:'.png' %}"
                           alt="Faceit Level {{ lvl }}"
                           width="35" height="35"
                           class="level-icon"
